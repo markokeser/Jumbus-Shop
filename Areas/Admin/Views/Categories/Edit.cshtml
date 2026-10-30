@@ -1,0 +1,140 @@
+@model CategoryFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? L["Admin_NewCategory"].Value : Model.Sr.Name;
+
+    ViewDataDictionary Prefixed(string prefix, string langCode, string langName)
+    {
+        var data = new ViewDataDictionary(ViewData) { ["LangCode"] = langCode, ["LangName"] = langName };
+        data.TemplateInfo.HtmlFieldPrefix = prefix;
+        return data;
+    }
+}
+
+<a class="back" asp-area="Admin" asp-controller="Categories" asp-action="Index">&#8592; @L["Admin_Categories"]</a>
+
+<header class="adm-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        @if (!Model.IsNew)
+        {
+            <p class="adm-sub"><code>@Model.Code</code> · @string.Format(L["Admin_CategoryProducts"].Value, Model.ProductCount)</p>
+        }
+    </div>
+    @if (Model.PublicUrlSr is not null)
+    {
+        <a class="btn-shop btn-quiet" href="@Model.PublicUrlSr" target="_blank" rel="noopener">@L["Admin_ViewInShop"] &#8599;</a>
+    }
+</header>
+
+<form method="post" asp-area="Admin" asp-controller="Categories" asp-action="Save" class="adm-form">
+    <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <section class="adm-card">
+        <div class="adm-card-hd"><h2>@L["Admin_Basics"]</h2></div>
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="Code">@L["Admin_Code"]</label>
+                @if (Model.IsNew)
+                {
+                    <input asp-for="Code" spellcheck="false" />
+                    <small class="hint">@L["Admin_CategoryCodeHint"]</small>
+                }
+                else
+                {
+                    <input asp-for="Code" readonly />
+                }
+                <span asp-validation-for="Code"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="ParentId">@L["Admin_ParentCategory"]</label>
+                <select asp-for="ParentId">
+                    <option value="">@L["Admin_TopLevel"]</option>
+                    @foreach (var option in Model.Parents)
+                    {
+                        <option value="@option.Value">@option.Text</option>
+                    }
+                </select>
+                @if (Model.HasChildren)
+                {
+                    <small class="hint">@L["Admin_CategoryStaysTop"]</small>
+                }
+                <span asp-validation-for="ParentId"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="DisplayOrder">@L["Admin_DisplayOrder"]</label>
+                <input asp-for="DisplayOrder" type="number" min="0" max="9999" />
+                <span asp-validation-for="DisplayOrder"></span>
+            </div>
+        </div>
+
+        <label class="ccheck">
+            <input asp-for="IsActive" />
+            <span>@L["Admin_CategoryVisible"]</span>
+        </label>
+        <span asp-validation-for="IsActive"></span>
+    </section>
+
+    <div class="adm-langs">
+        <partial name="_CategoryTranslationFields" model="Model.Sr" view-data='Prefixed("Sr", "sr", "Srpski")' />
+        <partial name="_CategoryTranslationFields" model="Model.En" view-data='Prefixed("En", "en", "English")' />
+    </div>
+
+    <section class="adm-card adm-card-flush">
+        <div class="adm-card-hd"><h2>@L["Admin_Attributes"]</h2></div>
+        <p class="adm-card-note">@L["Admin_CategoryAttributesHint"]</p>
+        <table class="adm-table adm-table-cards adm-attr-table">
+            <thead>
+                <tr>
+                    <th>@L["Admin_Attribute"]</th>
+                    <th>@L["Admin_AttributeApplies"]</th>
+                    <th>@L["Admin_AttributeRequired"]</th>
+                    <th class="num">@L["Admin_DisplayOrder"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Attributes.Count; i++)
+                {
+                    var row = Model.Attributes[i];
+                    <tr class="@(row.Assigned ? null : "is-off")">
+                        <td data-label="@L["Admin_Attribute"]">
+                            <input type="hidden" asp-for="Attributes[i].AttributeDefinitionId" />
+                            <span class="adm-strong">@row.Name</span>
+                            <small><code>@row.Code</code> · @(row.IsVariantDefining ? L["Admin_AttributeVariant"] : L["Admin_AttributeProduct"])</small>
+                        </td>
+                        <td data-label="@L["Admin_AttributeApplies"]">
+                            <label class="ccheck">
+                                <input asp-for="Attributes[i].Assigned" />
+                                <span class="visually-hidden">@row.Name</span>
+                            </label>
+                            @if (row.InUse)
+                            {
+                                <small>@L["Admin_AttributeInUseHint"]</small>
+                            }
+                            <span asp-validation-for="Attributes[i].Assigned"></span>
+                        </td>
+                        <td data-label="@L["Admin_AttributeRequired"]">
+                            <label class="ccheck">
+                                <input asp-for="Attributes[i].IsRequired" />
+                                <span class="visually-hidden">@L["Admin_AttributeRequired"]</span>
+                            </label>
+                        </td>
+                        <td class="num" data-label="@L["Admin_DisplayOrder"]">
+                            <input class="adm-order" asp-for="Attributes[i].DisplayOrder" type="number" min="0" max="999" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <div class="adm-actions">
+        <button type="submit" class="btn-shop">@L["Account_Save"]</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

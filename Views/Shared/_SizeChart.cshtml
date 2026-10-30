@@ -1,0 +1,42 @@
+@* Body measurements per size, in centimetres. Used on the size guide page
+   and under the size picker on clothing. If the cut of a brand differs,
+   say so in that product's description rather than changing this table. *@
+@{
+    (string Size, int Eu, string Bust, string Waist, string Hips)[] rows =
+    [
+        ("XS", 34, "80–84", "62–66", "88–92"),
+        ("S", 36, "84–88", "66–70", "92–96"),
+        ("M", 38, "88–92", "70–74", "96–100"),
+        ("L", 40, "92–96", "74–78", "100–104"),
+        ("XL", 42, "96–102", "78–84", "104–110"),
+        ("XXL", 44, "102–108", "84–90", "110–116")
+    ];
+}
+
+<div class="size-table-wrap">
+    <table class="size-table">
+        <caption class="visually-hidden">@L["Size_ChartCaption"]</caption>
+        <thead>
+            <tr>
+                <th scope="col">@L["Size_Label"]</th>
+                <th scope="col">EU</th>
+                <th scope="col">@L["Size_Bust"]</th>
+                <th scope="col">@L["Size_Waist"]</th>
+                <th scope="col">@L["Size_Hips"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in rows)
+            {
+                <tr>
+                    <th scope="row">@row.Size</th>
+                    <td>@row.Eu</td>
+                    <td>@row.Bust</td>
+                    <td>@row.Waist</td>
+                    <td>@row.Hips</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p class="size-note">@L["Size_ChartNote"]</p>

@@ -1,0 +1,263 @@
+@model ProductFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? L["Admin_NewProduct"].Value : Model.Sr.Name;
+    var currency = Shop.Value.Currency;
+
+    // The same partial renders both languages and every attribute; the field
+    // prefix is what makes their posted names bind back to the right place.
+    ViewDataDictionary Prefixed(string prefix, string? langCode = null, string? langName = null)
+    {
+        var data = new ViewDataDictionary(ViewData) { ["LangCode"] = langCode, ["LangName"] = langName };
+        data.TemplateInfo.HtmlFieldPrefix = prefix;
+        return data;
+    }
+}
+
+<a class="back" asp-area="Admin" asp-controller="Products" asp-action="Index">&#8592; @L["Admin_Products"]</a>
+
+<header class="adm-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        @if (!Model.IsNew)
+        {
+            <p class="adm-sub"><code>@Model.Sku</code></p>
+        }
+    </div>
+    @if (Model.PublicUrlSr is not null)
+    {
+        <a class="btn-shop btn-quiet" href="@Model.PublicUrlSr" target="_blank" rel="noopener">@L["Admin_ViewInShop"] &#8599;</a>
+    }
+</header>
+
+<form method="post" asp-area="Admin" asp-controller="Products" asp-action="Save" class="adm-form">
+    <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <section class="adm-card">
+        <div class="adm-card-hd"><h2>@L["Admin_Basics"]</h2></div>
+
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="Sku">SKU</label>
+                <input asp-for="Sku" spellcheck="false" />
+                <span asp-validation-for="Sku"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="CategoryId">@L["Admin_Category"]</label>
+                @if (Model.CategoryLocked)
+                {
+                    @* A disabled select is not posted; the hidden field carries the value. *@
+                    <input type="hidden" asp-for="CategoryId" />
+                    <select id="CategoryId_display" disabled>
+                        @foreach (var option in Model.Categories)
+                        {
+                            <option selected="@(option.Value == Model.CategoryId.ToString(CultureInfo.InvariantCulture))">@option.Text</option>
+                        }
+                    </select>
+                    <small class="hint">@L["Admin_CategoryLockedHint"]</small>
+                }
+                else
+                {
+                    <select asp-for="CategoryId">
+                        <option value="0">&#8212;</option>
+                        @foreach (var option in Model.Categories)
+                        {
+                            <option value="@option.Value">@option.Text</option>
+                        }
+                    </select>
+                }
+                <span asp-validation-for="CategoryId"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="BrandId">@L["Admin_Brand"]</label>
+                <select asp-for="BrandId">
+                    <option value="">&#8212;</option>
+                    @foreach (var option in Model.Brands)
+                    {
+                        <option value="@option.Value">@option.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="BrandId"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="Status">@L["Admin_Status"]</label>
+                <select asp-for="Status">
+                    @foreach (var status in Enum.GetValues<ProductStatus>())
+                    {
+                        <option value="@status">@L["ProductStatus_" + status]</option>
+                    }
+                </select>
+                <span asp-validation-for="Status"></span>
+            </div>
+        </div>
+
+        <label class="ccheck">
+            <input asp-for="IsFeatured" />
+            <span>@L["Admin_FeaturedLong"]</span>
+        </label>
+    </section>
+
+    <div class="adm-langs">
+        <partial name="_TranslationFields" model="Model.Sr" view-data='Prefixed("Sr", "sr", "Srpski")' />
+        <partial name="_TranslationFields" model="Model.En" view-data='Prefixed("En", "en", "English")' />
+    </div>
+
+    @if (Model.Shared.Count > 0 && Model.Variants.Count > 0)
+    {
+        <section class="adm-card">
+            <div class="adm-card-hd"><h2>@L["Admin_SharedAttributes"]</h2></div>
+            <p class="hint">@L["Admin_SharedAttributesHint"]</p>
+            <div class="adm-fields">
+                @for (var i = 0; i < Model.Shared.Count; i++)
+                {
+                    <partial name="_AttributeField" model="Model.Shared[i]" view-data='Prefixed($"Shared[{i}]")' />
+                }
+            </div>
+        </section>
+    }
+
+    <div class="adm-actions">
+        <button type="submit" class="btn-shop">@(Model.IsNew ? L["Admin_CreateProduct"] : L["Account_Save"])</button>
+        @if (Model.IsNew)
+        {
+            <span class="hint">@L["Admin_NewProductHint"]</span>
+        }
+    </div>
+</form>
+
+@if (!Model.IsNew)
+{
+    <section class="adm-card adm-card-flush" id="variants">
+        <div class="adm-card-hd">
+            <h2>@L["Admin_Variants"]</h2>
+            <a class="btn-shop btn-quiet" asp-area="Admin" asp-controller="Variants" asp-action="Create" asp-route-productId="@Model.Id">@L["Admin_AddVariant"]</a>
+        </div>
+
+        @if (Model.Variants.Count == 0)
+        {
+            <p class="adm-empty">@L["Admin_NoVariants"]</p>
+        }
+        else
+        {
+            <table class="adm-table adm-table-cards">
+                <thead>
+                    <tr>
+                        <th>@L["Admin_Variant"]</th>
+                        <th>SKU</th>
+                        <th class="num">@L["Admin_Price"]</th>
+                        <th class="num">@L["Admin_Stock"]</th>
+                        <th>@L["Admin_Expiry"]</th>
+                        <th>@L["Admin_Status"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var variant in Model.Variants)
+                    {
+                        <tr class="@(variant.IsActive ? null : "is-off")">
+                            <td data-label="@L["Admin_Variant"]">
+                                <a class="adm-strong" asp-area="Admin" asp-controller="Variants" asp-action="Edit" asp-route-id="@variant.Id">@(string.IsNullOrEmpty(variant.Label) ? variant.Sku : variant.Label)</a>
+                            </td>
+                            <td data-label="SKU"><code>@variant.Sku</code></td>
+                            <td class="num" data-label="@L["Admin_Price"]">
+                                @if (variant.OnSaleNow && variant.SalePrice is { } sale)
+                                {
+                                    <span class="adm-sale">@MoneyFormatter.Format(sale, currency)</span>
+                                    <small><s>@MoneyFormatter.Format(variant.Price, currency)</s></small>
+                                }
+                                else
+                                {
+                                    @MoneyFormatter.Format(variant.Price, currency)
+                                }
+                            </td>
+                            <td class="num" data-label="@L["Admin_Stock"]">
+                                <span class="adm-qty @(variant.Stock == 0 ? "is-out" : variant.Stock <= variant.LowStockThreshold ? "is-low" : null)">@variant.Stock</span>
+                            </td>
+                            <td data-label="@L["Admin_Expiry"]">@variant.ExpiryDate?.ToString("d", CultureInfo.CurrentCulture)</td>
+                            <td data-label="@L["Admin_Status"]">
+                                <span class="adm-pill @(variant.IsActive ? "pill-published" : "pill-archived")">@(variant.IsActive ? L["Admin_Active"] : L["Admin_Inactive"])</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+
+    <section class="adm-card" id="images">
+        <div class="adm-card-hd"><h2>@L["Admin_Images"]</h2></div>
+
+        <form method="post" enctype="multipart/form-data" class="adm-upload"
+              asp-area="Admin" asp-controller="Products" asp-action="Upload" asp-route-id="@Model.Id">
+            <input type="file" name="files" multiple accept="image/jpeg,image/png,image/webp" required aria-label="@L["Admin_Images"]" />
+            <button type="submit" class="btn-shop btn-quiet">@L["Admin_Upload"]</button>
+            <small class="hint">@L["Admin_UploadHint"]</small>
+        </form>
+
+        @if (Model.Images.Count == 0)
+        {
+            <p class="adm-empty">@L["Admin_NoImages"]</p>
+        }
+        else
+        {
+            <div class="adm-images">
+                @for (var i = 0; i < Model.Images.Count; i++)
+                {
+                    var image = Model.Images[i];
+
+                    <figure class="adm-image @(image.IsPrimary ? "is-primary" : null)">
+                        <img src="~/@image.Path" alt="@image.AltTextSr" loading="lazy" />
+                        @if (image.IsPrimary)
+                        {
+                            <span class="adm-image-badge">@L["Admin_Primary"]</span>
+                        }
+
+                        <form method="post" asp-area="Admin" asp-controller="Products" asp-action="ImageSave" asp-route-id="@Model.Id">
+                            <input type="hidden" name="imageId" value="@image.Id" />
+                            <input name="altSr" value="@image.AltTextSr" maxlength="250" placeholder="@L["Admin_AltSr"]" aria-label="@L["Admin_AltSr"]" />
+                            <input name="altEn" value="@image.AltTextEn" maxlength="250" placeholder="@L["Admin_AltEn"]" aria-label="@L["Admin_AltEn"]" />
+                            @if (Model.ImageOptions.Count > 0)
+                            {
+                                <select name="optionId" aria-label="@L["Admin_ImageFor"]">
+                                    <option value="">@L["Admin_ImageForAll"]</option>
+                                    @foreach (var option in Model.ImageOptions)
+                                    {
+                                        <option value="@option.Value" selected="@(option.Value == image.AttributeOptionId?.ToString(CultureInfo.InvariantCulture))">@option.Text</option>
+                                    }
+                                </select>
+                            }
+                            <button type="submit" class="linkish">@L["Account_Save"]</button>
+                        </form>
+
+                        <div class="adm-image-tools">
+                            @if (!image.IsPrimary)
+                            {
+                                <form method="post" asp-area="Admin" asp-controller="Products" asp-action="ImagePrimary" asp-route-id="@Model.Id">
+                                    <input type="hidden" name="imageId" value="@image.Id" />
+                                    <button type="submit" class="linkish">@L["Admin_MakePrimary"]</button>
+                                </form>
+                            }
+                            <form method="post" asp-area="Admin" asp-controller="Products" asp-action="ImageMove" asp-route-id="@Model.Id">
+                                <input type="hidden" name="imageId" value="@image.Id" />
+                                <button type="submit" name="direction" value="-1" class="linkish" disabled="@(i == 0)" aria-label="@L["Admin_MoveEarlier"]">&#8592;</button>
+                                <button type="submit" name="direction" value="1" class="linkish" disabled="@(i == Model.Images.Count - 1)" aria-label="@L["Admin_MoveLater"]">&#8594;</button>
+                            </form>
+                            <form method="post" asp-area="Admin" asp-controller="Products" asp-action="ImageDelete" asp-route-id="@Model.Id"
+                                  data-confirm="@L["Admin_ConfirmDelete"]">
+                                <input type="hidden" name="imageId" value="@image.Id" />
+                                <button type="submit" class="linkish quiet">@L["Cart_Remove"]</button>
+                            </form>
+                        </div>
+                    </figure>
+                }
+            </div>
+        }
+    </section>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ConfirmScript" />
+}

@@ -1,0 +1,34 @@
+@* The seller's identity. Every value comes from Shop:Company in appsettings.json. *@
+@{
+    var company = ShopOptions.Value.Company;
+    var dial = new string(company.Phone.Where(c => char.IsDigit(c) || c == '+').ToArray());
+}
+
+<dl class="legal-company">
+    <dt>@L["Legal_Company"]</dt>
+    <dd>@company.LegalName</dd>
+
+    <dt>@L["Legal_Address"]</dt>
+    <dd>@company.Address</dd>
+
+    <dt>@L["Legal_TaxId"]</dt>
+    <dd>@company.TaxId</dd>
+
+    <dt>@L["Legal_RegNo"]</dt>
+    <dd>@company.RegistrationNumber</dd>
+
+    <dt>@L["Legal_Activity"]</dt>
+    <dd>@company.ActivityCode</dd>
+
+    <dt>@L["Legal_Email"]</dt>
+    <dd><a href="mailto:@company.Email">@company.Email</a></dd>
+
+    <dt>@L["Legal_Phone"]</dt>
+    <dd>
+        <a href="tel:@dial">@company.Phone</a>
+        @if (company.SupportHours.Length > 0)
+        {
+            <span class="legal-muted">@string.Format(L["Legal_Hours"].Value, company.SupportHours)</span>
+        }
+    </dd>
+</dl>

@@ -1,0 +1,18 @@
+@{
+    var section = ViewData["AccountSection"] as string;
+    string? On(string name) => section == name ? "on" : null;
+}
+
+<nav class="acct-nav" aria-label="@L["Nav_Account"]">
+    <a class="@On("Overview")" asp-controller="Account" asp-action="Index">@L["Account_Overview"]</a>
+    <a class="@On("Orders")" asp-controller="Orders" asp-action="Index">@L["Nav_MyOrders"]</a>
+    <a class="@On("Addresses")" asp-controller="Addresses" asp-action="Index">@L["Account_Addresses"]</a>
+    <a class="@On("Wishlist")" asp-controller="Wishlist" asp-action="Index">@L["Nav_Wishlist"]</a>
+    <a class="@On("Profile")" asp-controller="Account" asp-action="Profile">@L["Account_Profile"]</a>
+    <a class="@On("Password")" asp-controller="Account" asp-action="Password">@L["Account_Password"]</a>
+    <a class="@On("Data")" asp-controller="Account" asp-action="Data">@L["Account_Data"]</a>
+
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit" class="linkbtn">@L["Nav_SignOut"]</button>
+    </form>
+</nav>

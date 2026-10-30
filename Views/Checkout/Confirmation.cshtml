@@ -1,0 +1,103 @@
+@model WebShop.Models.Orders.Order
+@{
+    ViewData["Title"] = string.Format(L["Confirm_Title"].Value, Model.OrderNumber);
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell confirm">
+    <h1>@L["Confirm_Heading"]</h1>
+    <p class="confirm-lede">@string.Format(L["Confirm_Body"].Value, Model.OrderNumber, Model.Email)</p>
+
+    <div class="confirm-grid">
+        <section>
+            <h2>@L["Confirm_Items"]</h2>
+            <ul class="mini-lines">
+                @foreach (var item in Model.Items)
+                {
+                    <li>
+                        <span class="mini-qty">@item.Quantity&#215;</span>
+                        <span class="mini-name">
+                            @item.ProductName
+                            @if (!string.IsNullOrEmpty(item.VariantDescription))
+                            {
+                                <small>@item.VariantDescription</small>
+                            }
+                        </span>
+                        <span class="mini-sum">@MoneyFormatter.Format(item.LineTotal, Model.Currency)</span>
+                    </li>
+                }
+            </ul>
+
+            <dl class="totals">
+                <div>
+                    <dt>@L["Totals_Subtotal"]</dt>
+                    <dd>@MoneyFormatter.Format(Model.Subtotal, Model.Currency)</dd>
+                </div>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="totals-discount">
+                        <dt>@L["Totals_Discount"]</dt>
+                        <dd>&#8722;@MoneyFormatter.Format(Model.DiscountAmount, Model.Currency)</dd>
+                    </div>
+                }
+                <div>
+                    <dt>@L["Totals_Shipping"]</dt>
+                    <dd>
+                        @if (Model.ShippingFee <= 0)
+                        {
+                            <span class="free">@L["Totals_FreeShipping"]</span>
+                        }
+                        else
+                        {
+                            @MoneyFormatter.Format(Model.ShippingFee, Model.Currency)
+                        }
+                    </dd>
+                </div>
+                <div class="totals-sum">
+                    <dt>@L["Totals_Total"]</dt>
+                    <dd>@MoneyFormatter.Format(Model.Total, Model.Currency)</dd>
+                </div>
+                <div class="totals-vat">
+                    <dt>@string.Format(L["Totals_VatIncluded"].Value, (Model.VatRate * 100).ToString("0.##"))</dt>
+                    <dd>@MoneyFormatter.Format(Model.VatAmount, Model.Currency)</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section>
+            <h2>@L["Confirm_Delivery"]</h2>
+            <address class="confirm-address">
+                @Model.FirstName @Model.LastName<br />
+                @Model.ShippingStreet @Model.ShippingStreetNumber<br />
+                @Model.ShippingPostalCode @Model.ShippingCity<br />
+                @Model.PhoneNumber
+            </address>
+
+            <dl class="pdp-facts">
+                <div>
+                    <dt>@L["Checkout_Courier"]</dt>
+                    <dd>@Model.CourierName</dd>
+                </div>
+                <div>
+                    <dt>@L["Checkout_Payment"]</dt>
+                    <dd>
+                        @(Model.PaymentMethod == WebShop.Models.Orders.PaymentMethod.CashOnDelivery
+                            ? L["Payment_CashOnDelivery"]
+                            : L["Payment_Card"])
+                    </dd>
+                </div>
+                @if (Model.CompanyName is { Length: > 0 })
+                {
+                    <div>
+                        <dt>@L["Checkout_CompanyName"]</dt>
+                        <dd>@Model.CompanyName (@L["Checkout_TaxNumber"] @Model.CompanyTaxNumber)</dd>
+                    </div>
+                }
+            </dl>
+
+            <p class="confirm-returns">@string.Format(L["Confirm_Returns"].Value, 14)</p>
+        </section>
+    </div>
+
+    <a class="btn-shop btn-quiet" asp-controller="Products" asp-action="Index">@L["Footer_AllProducts"]</a>
+</div>

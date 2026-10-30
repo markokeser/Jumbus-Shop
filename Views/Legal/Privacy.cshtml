@@ -1,0 +1,80 @@
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Privacy policy";
+    ViewData["MetaDescription"] = $"What data {shop.Name} collects, why, how long it is kept and how to use your rights.";
+}
+@* English version of Privacy.sr.cshtml; keep the two in step. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">In force from 30 October 2026. This translation is provided for convenience; the Serbian version prevails.</p>
+
+        <h2>1. Who processes your data</h2>
+        <p>The controller of your personal data is:</p>
+        <partial name="_Company" />
+        <p>For anything about your data, write to <a href="mailto:@shop.Company.Email">@shop.Company.Email</a>.</p>
+
+        <h2>2. What we collect</h2>
+        <ul>
+            <li><strong>Orders:</strong> name, email, phone, delivery address and, if you enter them, billing address, company name and tax number; the products, amounts, payment method and status, courier, tracking number and your note.</li>
+            <li><strong>Account</strong>, if you open one: email, first and last name, phone, password (we keep only a cryptographic hash, never the password itself), chosen language, saved addresses, wishlist and registration date.</li>
+            <li><strong>Reviews:</strong> rating and text; we publish your first name and the initial of your last name with them.</li>
+            <li><strong>News and offers</strong>, if you chose them: your email and the fact that you agreed.</li>
+            <li><strong>Technical data:</strong> IP address and time of access, in the server logs and to limit sign-in attempts; the necessary <a asp-action="Cookies">cookies</a>. A guest's cart is kept on the server while it is in use.</li>
+        </ul>
+        <p>Card details never reach us: you enter them with the payment processor.</p>
+
+        <h2>3. Why we process them, and on what basis</h2>
+        <table class="legal-table">
+            <thead><tr><th scope="col">Purpose</th><th scope="col">Legal basis</th></tr></thead>
+            <tbody>
+                <tr><td>Taking, delivering and charging orders; withdrawals, refunds and complaints; the customer account</td><td>performance of a contract (Art. 12(1)(2) of the Personal Data Protection Act)</td></tr>
+                <tr><td>Invoices, accounting records, the complaints register</td><td>legal obligation (Art. 12(1)(3))</td></tr>
+                <tr><td>Site security, preventing abuse and fraud</td><td>legitimate interest (Art. 12(1)(6))</td></tr>
+                <tr><td>News and offers by email</td><td>your consent (Art. 12(1)(1)), which you can withdraw at any time</td></tr>
+            </tbody>
+        </table>
+        <p>We do not profile customers or make automated decisions about you.</p>
+
+        <h2>4. Who receives them</h2>
+        <ul>
+            <li><strong>The courier</strong> you chose (name, address, phone, cash-on-delivery amount) — so the parcel arrives.</li>
+            <li><strong>The payment processor</strong>, when you pay by card.</li>
+            <li><strong>Service providers</strong> processing data for us under contract: hosting, IT support, bookkeeping. They may use it only for that service.</li>
+            <li><strong>Public authorities</strong>, only where the law requires it.</li>
+        </ul>
+        <p>We do not sell your data or pass it on for others' marketing. If a processor stores data outside Serbia, the transfer is made only to countries with an adequate level of protection or with the safeguards the Act prescribes.</p>
+
+        <h2>5. How long we keep them</h2>
+        <ul>
+            <li>Account, addresses and wishlist — until you delete the account.</li>
+            <li>Orders and invoices — as long as accounting and tax rules require, also after the account is deleted.</li>
+            <li>Complaints — at least two years from filing, as the Consumer Protection Act requires.</li>
+            <li>Reviews — until you delete the account, or earlier if you ask.</li>
+            <li>Consent to news — until you withdraw it.</li>
+            <li>Technical logs — as long as needed for the security of the system.</li>
+        </ul>
+
+        <h2>6. Your rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>know whether we process your data and get a copy (Art. 26);</li>
+            <li>have inaccurate data corrected and incomplete data completed (Art. 29);</li>
+            <li>have your data erased (Art. 30) and processing restricted (Art. 31);</li>
+            <li>receive your data in a machine-readable format and take it to another controller (Art. 36);</li>
+            <li>object to processing based on legitimate interest (Art. 37);</li>
+            <li>withdraw consent, without affecting processing before the withdrawal (Art. 15);</li>
+            <li>lodge a complaint with the Commissioner for Information of Public Importance and Personal Data Protection (<a href="https://www.poverenik.rs" rel="noopener">www.poverenik.rs</a>) (Art. 82).</li>
+        </ul>
+        <p>With an account, you can download your data and delete the account yourself under <em>My data</em>. For anything else, write to us; we answer without delay and within 30 days at the latest. Where a request is complex, that period can be extended by another 60 days, and we will tell you.</p>
+
+        <h2>7. How we protect them</h2>
+        <p>The site runs over an encrypted connection (HTTPS). Passwords are kept only as a cryptographic hash. An account is locked for a while after ten failed sign-in attempts. Only staff who need the data for their work can access it.</p>
+
+        <h2>8. Changes</h2>
+        <p>We will announce important changes to this policy on the site, and to account holders by email.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

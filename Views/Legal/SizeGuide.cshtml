@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Size guide";
+    ViewData["MetaDescription"] = "Bust, waist and hip measurements for sizes XS–XXL, and how to measure yourself.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p>Measurements are in centimetres and describe the body, not the garment. Where a product's cut differs, its description says so.</p>
+
+        <partial name="_SizeChart" />
+
+        <h2>How to measure</h2>
+        <ul>
+            <li><strong>Bust</strong> — around the fullest part, with the tape level under the arms.</li>
+            <li><strong>Waist</strong> — at the narrowest point, usually just above the navel.</li>
+            <li><strong>Hips</strong> — around the widest part, about 20 cm below the waist.</li>
+        </ul>
+        <p>Measure over underwear, with the tape snug but not tight. If you are between two sizes, take the larger one for fitted cuts.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

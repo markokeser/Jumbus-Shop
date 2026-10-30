@@ -1,0 +1,51 @@
+@model List<BrandRow>
+@{
+    ViewData["Title"] = L["Admin_Brands"].Value;
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Brands"]</h1>
+    <a class="btn-shop" asp-area="Admin" asp-controller="Brands" asp-action="Create">@L["Admin_NewBrand"]</a>
+</header>
+
+<section class="adm-card adm-card-flush adm-narrow">
+    <table class="adm-table adm-table-cards">
+        <thead>
+            <tr>
+                <th>@L["Admin_Name"]</th>
+                <th class="num">@L["Admin_Products"]</th>
+                <th>@L["Admin_Status"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var brand in Model)
+            {
+                <tr class="@(brand.IsActive ? null : "is-off")">
+                    <td data-label="@L["Admin_Name"]">
+                        <a class="adm-strong" asp-area="Admin" asp-controller="Brands" asp-action="Edit" asp-route-id="@brand.Id">@brand.Name</a>
+                        <small><code>@brand.Slug</code></small>
+                    </td>
+                    <td class="num" data-label="@L["Admin_Products"]">
+                        <a asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-brandId="@brand.Id">@brand.Products</a>
+                    </td>
+                    <td data-label="@L["Admin_Status"]">
+                        <span class="adm-pill @(brand.IsActive ? "pill-published" : "pill-archived")">@(brand.IsActive ? L["Admin_Active"] : L["Admin_Inactive"])</span>
+                    </td>
+                    <td class="adm-row-actions">
+                        @if (brand.Products == 0)
+                        {
+                            <form method="post" asp-area="Admin" asp-controller="Brands" asp-action="Delete" asp-route-id="@brand.Id" data-confirm="@L["Admin_ConfirmDelete"]">
+                                <button type="submit" class="linkish quiet">@L["Admin_Delete"]</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@section Scripts {
+    <partial name="_ConfirmScript" />
+}

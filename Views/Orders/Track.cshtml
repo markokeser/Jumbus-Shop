@@ -1,0 +1,44 @@
+@model WebShop.ViewModels.Account.TrackOrderViewModel
+@{
+    ViewData["Title"] = L["Footer_TrackOrder"].Value;
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell">
+    @if (Model.Order is null)
+    {
+        <div class="auth">
+            <h1>@L["Footer_TrackOrder"]</h1>
+            <p class="auth-lede">@L["Track_Lede"]</p>
+
+            @if (Model.Searched && ViewData.ModelState.IsValid)
+            {
+                <div class="notice notice-bad"><p>@L["Track_NotFound"]</p></div>
+            }
+
+            <form method="post" asp-controller="Orders" asp-action="Track" class="auth-form">
+                <div class="cinput">
+                    <label asp-for="OrderNumber">@L["Track_Number"]</label>
+                    <input asp-for="OrderNumber" placeholder="2026-000148" autofocus />
+                    <span asp-validation-for="OrderNumber"></span>
+                </div>
+                <div class="cinput">
+                    <label asp-for="Email">@L["Checkout_Email"]</label>
+                    <input asp-for="Email" type="email" autocomplete="email" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <button type="submit" class="btn-shop auth-submit">@L["Track_Find"]</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="od-guest">
+            <partial name="_OrderDetail" model="Model.Order" />
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

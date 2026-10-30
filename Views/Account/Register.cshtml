@@ -1,0 +1,69 @@
+@model WebShop.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = L["Nav_Register"].Value;
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell auth">
+    <h1>@L["Nav_Register"]</h1>
+    <p class="auth-lede">@L["Account_RegisterLede"]</p>
+
+    <form method="post" asp-controller="Account" asp-action="Register" class="auth-form">
+        <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="crow">
+            <div class="cinput">
+                <label asp-for="FirstName">@L["Checkout_FirstName"]</label>
+                <input asp-for="FirstName" autocomplete="given-name" />
+                <span asp-validation-for="FirstName"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="LastName">@L["Checkout_LastName"]</label>
+                <input asp-for="LastName" autocomplete="family-name" />
+                <span asp-validation-for="LastName"></span>
+            </div>
+        </div>
+
+        <div class="cinput">
+            <label asp-for="Email">@L["Checkout_Email"]</label>
+            <input asp-for="Email" type="email" autocomplete="email" />
+            <span asp-validation-for="Email"></span>
+        </div>
+
+        <div class="cinput">
+            <label asp-for="Password">@L["Account_PasswordLabel"]</label>
+            <input asp-for="Password" autocomplete="new-password" />
+            <small class="hint">@L["Account_PasswordRule"]</small>
+            <span asp-validation-for="Password"></span>
+        </div>
+
+        <div class="cinput">
+            <label asp-for="ConfirmPassword">@L["Account_ConfirmPassword"]</label>
+            <input asp-for="ConfirmPassword" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword"></span>
+        </div>
+
+        <label class="ccheck">
+            <input asp-for="AcceptsTerms" />
+            <span>@L["Checkout_AcceptTerms"]</span>
+        </label>
+        <span asp-validation-for="AcceptsTerms"></span>
+
+        <label class="ccheck">
+            <input asp-for="AcceptsMarketing" />
+            <span>@L["Account_Marketing"]</span>
+        </label>
+
+        <button type="submit" class="btn-shop auth-submit">@L["Nav_Register"]</button>
+    </form>
+
+    <p class="auth-alt">
+        @L["Account_HaveAccount"]
+        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl">@L["Nav_SignIn"]</a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

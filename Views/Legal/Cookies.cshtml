@@ -1,0 +1,55 @@
+@model ConsentChoice?
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Cookies";
+    ViewData["MetaDescription"] = $"Which cookies {shop.Name} uses and how to change your choice.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">In force from 30 October 2026.</p>
+
+        <p>A cookie is a small file a site keeps in your browser. We use <strong>only necessary cookies</strong>: without them you could not sign in, keep a cart or have the site remember your language. The law does not require consent for them, and nothing in them lets us follow you on other sites.</p>
+        <p>We use no analytics, no ad networks and no third-party cookies. Fonts and images come from our own server, so opening a page reports your address to no one else. If that ever changes, such cookies will only be set once you accept them.</p>
+
+        <table class="legal-table">
+            <thead>
+                <tr><th scope="col">Cookie</th><th scope="col">What it does</th><th scope="col">How long it lasts</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>.AspNetCore.Identity.Application</code></td><td>signing in to your account</td><td>14 days if you choose "Remember me", otherwise until the browser closes</td></tr>
+                <tr><td><code>.WebShop.Session</code></td><td>the cart and your details during checkout</td><td>until the browser closes</td></tr>
+                <tr><td><code>.AspNetCore.Culture</code></td><td>the language you chose</td><td>one year</td></tr>
+                <tr><td><code>.AspNetCore.Antiforgery.…</code></td><td>protects forms against misuse from other sites</td><td>until the browser closes</td></tr>
+                <tr><td><code>.AspNetCore.Mvc.CookieTempDataProvider</code></td><td>a short notice after an action, such as "Saved"</td><td>until the next page</td></tr>
+                <tr><td><code>@CookieConsent.CookieName</code></td><td>your choice on this page</td><td>6 months</td></tr>
+            </tbody>
+        </table>
+
+        <section class="legal-choice" id="izbor">
+            <h2>Your choice</h2>
+            <p>
+                @(Model switch
+                {
+                    ConsentChoice.All => "You accepted all cookies.",
+                    ConsentChoice.Necessary => "You chose necessary cookies only.",
+                    _ => "You have not chosen yet."
+                })
+                You can change it at any time.
+            </p>
+            <form method="post" asp-action="Consent" class="legal-choice-acts">
+                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + "#izbor")" />
+                <button type="submit" name="choice" value="necessary" class="btn-shop btn-quiet">@L["Cookie_OnlyNecessary"]</button>
+                <button type="submit" name="choice" value="all" class="btn-shop btn-quiet">@L["Cookie_AcceptAll"]</button>
+            </form>
+        </section>
+
+        <h2>Deleting cookies</h2>
+        <p>You can delete cookies in your browser settings. You will then be signed out, a guest cart will be emptied and the cookie question will appear again.</p>
+
+        <p>How we handle data in general is described in the <a asp-action="Privacy">Privacy policy</a>.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

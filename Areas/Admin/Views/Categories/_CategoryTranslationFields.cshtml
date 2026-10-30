@@ -1,0 +1,41 @@
+@model CategoryTranslationForm
+@* Rendered twice with HtmlFieldPrefix "Sr" and "En", so asp-for produces
+   Sr.Name / En.Name and server-side errors land next to the right field. *@
+
+<fieldset class="adm-card adm-lang-card" lang="@ViewData["LangCode"]">
+    <legend class="adm-card-hd"><h2>@ViewData["LangName"]</h2></legend>
+
+    <div class="cinput">
+        <label asp-for="Name">@L["Admin_Name"]</label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="Slug">@L["Admin_Slug"]</label>
+        <input asp-for="Slug" spellcheck="false" />
+        <small class="hint">@L["Admin_SlugHintRedirect"]</small>
+        <span asp-validation-for="Slug"></span>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="Description">@L["Admin_Description"]</label>
+        <textarea asp-for="Description" rows="3"></textarea>
+        <small class="hint">@L["Admin_CategoryDescriptionHint"]</small>
+        <span asp-validation-for="Description"></span>
+    </div>
+
+    <details class="adm-seo">
+        <summary>@L["Admin_Seo"]</summary>
+        <div class="cinput">
+            <label asp-for="MetaTitle">@L["Admin_MetaTitle"]</label>
+            <input asp-for="MetaTitle" />
+            <span asp-validation-for="MetaTitle"></span>
+        </div>
+        <div class="cinput">
+            <label asp-for="MetaDescription">@L["Admin_MetaDescription"]</label>
+            <textarea asp-for="MetaDescription" rows="2"></textarea>
+            <span asp-validation-for="MetaDescription"></span>
+        </div>
+    </details>
+</fieldset>

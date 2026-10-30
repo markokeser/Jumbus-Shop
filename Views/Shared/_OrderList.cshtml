@@ -1,0 +1,14 @@
+@model IEnumerable<WebShop.Models.Orders.Order>
+
+<div class="olist">
+    @foreach (var order in Model)
+    {
+        <a class="orow" asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderNumber">
+            <span class="orow-number">@order.OrderNumber</span>
+            <span class="orow-date">@ShopTime.Date(order.PlacedUtc)</span>
+            <span class="status st-@order.Status.ToString().ToLowerInvariant()">@L["OrderStatus_" + order.Status]</span>
+            <span class="orow-items">@string.Format(L["Orders_ItemCount"].Value, order.Items.Sum(i => i.Quantity))</span>
+            <span class="orow-total">@MoneyFormatter.Format(order.Total, order.Currency)</span>
+        </a>
+    }
+</div>

@@ -1,0 +1,41 @@
+@model List<WebShop.ViewModels.Catalog.ProductCardViewModel>
+@{
+    ViewData["Title"] = L["Nav_Wishlist"].Value;
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Wishlist";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <h1>@L["Nav_Wishlist"]</h1>
+
+        @if (Model.Count == 0)
+        {
+            <div class="empty">
+                <h2>@L["Wishlist_Empty"]</h2>
+                <p>@L["Wishlist_EmptyBody"]</p>
+                <a class="btn-shop" asp-controller="Products" asp-action="Index">@L["Footer_AllProducts"]</a>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-3">
+                @foreach (var product in Model)
+                {
+                    @* The card is a link, and a form cannot sit inside a link,
+                       so the remove button lives beside it rather than on it. *@
+                    <div class="wish">
+                        <partial name="_ProductCard" model="product" />
+                        <form method="post" asp-controller="Wishlist" asp-action="Toggle">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <button type="submit" class="linkish quiet">@L["Wishlist_Remove"]</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

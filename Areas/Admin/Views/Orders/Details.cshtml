@@ -1,0 +1,232 @@
+@model AdminOrderDetailsViewModel
+@{
+    var order = Model.Order;
+    ViewData["Title"] = order.OrderNumber;
+}
+
+<a class="back" asp-area="Admin" asp-controller="Orders" asp-action="Index">&#8592; @L["Admin_Orders"]</a>
+
+<header class="adm-head">
+    <div>
+        <h1>@order.OrderNumber</h1>
+        <p class="adm-sub">@string.Format(L["Orders_PlacedOn"].Value, ShopTime.DateAndTime(order.PlacedUtc)) · @(order.Culture == "en" ? "English" : "Srpski")</p>
+    </div>
+    <div class="adm-head-actions">
+        <span class="status st-@order.Status.ToString().ToLowerInvariant()">@L["OrderStatus_" + order.Status]</span>
+        <button type="button" class="btn-shop btn-quiet adm-noprint" onclick="window.print()">@L["Admin_Print"]</button>
+    </div>
+</header>
+
+<div class="adm-grid">
+    <div class="adm-col">
+        <section class="adm-card">
+            <div class="adm-card-hd"><h2>@L["Admin_ItemsTitle"]</h2></div>
+            <table class="adm-table adm-table-cards">
+                <thead>
+                    <tr>
+                        <th>@L["Admin_Product"]</th>
+                        <th>SKU</th>
+                        <th class="num">@L["Admin_Qty"]</th>
+                        <th class="num">@L["Admin_UnitPrice"]</th>
+                        <th class="num">@L["Totals_Total"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in order.Items)
+                    {
+                        <tr>
+                            <td data-label="@L["Admin_Product"]">
+                                <span class="adm-strong">@item.ProductName</span>
+                                <small>@item.VariantDescription</small>
+                            </td>
+                            <td data-label="SKU"><code>@item.Sku</code></td>
+                            <td class="num" data-label="@L["Admin_Qty"]">@item.Quantity</td>
+                            <td class="num" data-label="@L["Admin_UnitPrice"]">@MoneyFormatter.Format(item.UnitPrice, order.Currency)</td>
+                            <td class="num" data-label="@L["Totals_Total"]">@MoneyFormatter.Format(item.LineTotal, order.Currency)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <dl class="totals adm-totals">
+                <div><dt>@L["Totals_Subtotal"]</dt><dd>@MoneyFormatter.Format(order.Subtotal, order.Currency)</dd></div>
+                @if (order.DiscountAmount > 0)
+                {
+                    <div class="totals-discount">
+                        <dt>@L["Totals_Discount"] @if (Model.CouponCode is not null) { <code>@Model.CouponCode</code> }</dt>
+                        <dd>&#8722;@MoneyFormatter.Format(order.DiscountAmount, order.Currency)</dd>
+                    </div>
+                }
+                <div><dt>@L["Totals_Shipping"]</dt><dd>@MoneyFormatter.Format(order.ShippingFee, order.Currency)</dd></div>
+                <div class="totals-sum"><dt>@L["Totals_Total"]</dt><dd>@MoneyFormatter.Format(order.Total, order.Currency)</dd></div>
+                <div class="totals-vat">
+                    <dt>@string.Format(L["Totals_VatIncluded"].Value, (order.VatRate * 100).ToString("0.##"))</dt>
+                    <dd>@MoneyFormatter.Format(order.VatAmount, order.Currency)</dd>
+                </div>
+            </dl>
+        </section>
+
+        <div class="adm-split">
+            <section class="adm-card">
+                <div class="adm-card-hd"><h2>@L["Admin_Customer"]</h2></div>
+                <p class="adm-lines">
+                    <b>@order.FirstName @order.LastName</b><br />
+                    <a href="mailto:@order.Email">@order.Email</a><br />
+                    <a href="tel:@order.PhoneNumber">@order.PhoneNumber</a>
+                </p>
+                <p class="adm-sub">
+                    @(order.UserId is null ? L["Admin_Guest"] : L["Admin_HasAccount"])
+                    · @string.Format(L["Admin_OrdersByCustomer"].Value, Model.CustomerOrderCount)
+                </p>
+                @if (!string.IsNullOrEmpty(order.CompanyName))
+                {
+                    <p class="adm-lines">
+                        <b>@order.CompanyName</b><br />
+                        @L["Checkout_TaxNumber"]: @order.CompanyTaxNumber<br />
+                        @order.BillingStreet<br />@order.BillingPostalCode @order.BillingCity
+                    </p>
+                }
+            </section>
+
+            <section class="adm-card">
+                <div class="adm-card-hd"><h2>@L["Admin_Delivery"]</h2></div>
+                <address class="adm-lines">
+                    @order.FirstName @order.LastName<br />
+                    @order.ShippingStreet @order.ShippingStreetNumber<br />
+                    @order.ShippingPostalCode @order.ShippingCity
+                </address>
+                <p class="adm-sub">
+                    @order.CourierName
+                    @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                    {
+                        <text> · <code>@order.TrackingNumber</code></text>
+                    }
+                </p>
+            </section>
+        </div>
+
+        @if (!string.IsNullOrEmpty(order.CustomerNote))
+        {
+            <section class="adm-card adm-note">
+                <div class="adm-card-hd"><h2>@L["Admin_CustomerNote"]</h2></div>
+                <p>@order.CustomerNote</p>
+            </section>
+        }
+    </div>
+
+    <aside class="adm-col adm-aside adm-noprint">
+        <section class="adm-card">
+            <div class="adm-card-hd"><h2>@L["Admin_NextStep"]</h2></div>
+
+            @if (Model.NextSteps.Count == 0)
+            {
+                <p class="adm-empty">@L["Admin_OrderClosed"]</p>
+            }
+
+            @foreach (var step in Model.NextSteps)
+            {
+                <form method="post" asp-area="Admin" asp-controller="Orders" asp-action="Status" asp-route-id="@order.OrderNumber"
+                      class="adm-step adm-step-@step.ToString().ToLowerInvariant()"
+                      data-confirm="@(step is OrderStatus.Cancelled or OrderStatus.Returned ? L["Admin_ConfirmStep"].Value : null)">
+                    <input type="hidden" name="Target" value="@step" />
+
+                    @if (step == OrderStatus.Shipped)
+                    {
+                        <div class="cinput">
+                            <label for="courier">@L["Checkout_Courier"]</label>
+                            <select id="courier" name="Courier">
+                                @foreach (var courier in Couriers.All)
+                                {
+                                    <option value="@courier" selected="@(courier == order.CourierName)">@courier</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="cinput">
+                            <label for="tracking">@L["Admin_TrackingNumber"]</label>
+                            <input id="tracking" name="TrackingNumber" maxlength="120" required value="@order.TrackingNumber" />
+                        </div>
+                    }
+
+                    @if (step == OrderStatus.Returned)
+                    {
+                        <label class="ccheck">
+                            <input type="checkbox" name="Restock" value="true" checked />
+                            <span>@L["Admin_RestockReturned"]</span>
+                        </label>
+                        <input type="hidden" name="Restock" value="false" />
+                    }
+
+                    @if (step == OrderStatus.Cancelled)
+                    {
+                        <p class="hint">@L["Admin_CancelEffects"]</p>
+                    }
+
+                    <button type="submit" class="btn-shop @(step is OrderStatus.Cancelled or OrderStatus.Returned ? "btn-quiet" : null)">
+                        @L["Admin_Mark_" + step]
+                    </button>
+                </form>
+            }
+        </section>
+
+        <section class="adm-card">
+            <div class="adm-card-hd"><h2>@L["Checkout_Payment"]</h2></div>
+            <p class="adm-lines">
+                @L["Payment_" + order.PaymentMethod]
+                @if (!string.IsNullOrEmpty(order.PaymentReference))
+                {
+                    <br /><code>@order.PaymentReference</code>
+                }
+            </p>
+            <form method="post" asp-area="Admin" asp-controller="Orders" asp-action="Payment" asp-route-id="@order.OrderNumber" class="adm-inline">
+                <select name="status" aria-label="@L["Checkout_Payment"]">
+                    @foreach (var status in Enum.GetValues<PaymentStatus>())
+                    {
+                        <option value="@status" selected="@(status == order.PaymentStatus)">@L["PaymentStatus_" + status]</option>
+                    }
+                </select>
+                <button type="submit" class="btn-shop btn-quiet">@L["Account_Save"]</button>
+            </form>
+            @if (order.PaymentMethod == PaymentMethod.Card)
+            {
+                <p class="hint">@L["Admin_CardRefundHint"]</p>
+            }
+        </section>
+
+        <section class="adm-card">
+            <div class="adm-card-hd"><h2>@L["Admin_History"]</h2></div>
+            <ol class="adm-timeline">
+                <li><b>@L["OrderStatus_New"]</b> <span>@ShopTime.DateAndTime(order.PlacedUtc)</span></li>
+                @if (order.ConfirmedUtc is { } confirmed)
+                {
+                    <li><b>@L["OrderStatus_Confirmed"]</b> <span>@ShopTime.DateAndTime(confirmed)</span></li>
+                }
+                @if (order.ShippedUtc is { } shipped)
+                {
+                    <li><b>@L["OrderStatus_Shipped"]</b> <span>@ShopTime.DateAndTime(shipped)</span></li>
+                }
+                @if (order.DeliveredUtc is { } delivered)
+                {
+                    <li><b>@L["OrderStatus_Delivered"]</b> <span>@ShopTime.DateAndTime(delivered)</span></li>
+                }
+                @if (order.Status is OrderStatus.Cancelled or OrderStatus.Returned)
+                {
+                    <li class="is-end"><b>@L["OrderStatus_" + order.Status]</b></li>
+                }
+            </ol>
+        </section>
+
+        <section class="adm-card">
+            <div class="adm-card-hd"><h2>@L["Admin_InternalNote"]</h2></div>
+            <form method="post" asp-area="Admin" asp-controller="Orders" asp-action="Note" asp-route-id="@order.OrderNumber">
+                <div class="cinput">
+                    <textarea name="note" rows="3" maxlength="2000" aria-label="@L["Admin_InternalNote"]">@order.AdminNote</textarea>
+                </div>
+                <button type="submit" class="btn-shop btn-quiet">@L["Account_Save"]</button>
+            </form>
+        </section>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ConfirmScript" />
+}

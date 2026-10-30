@@ -1,0 +1,44 @@
+@model int
+@{
+    var routeCode = CultureConstants.ToRouteCode(System.Globalization.CultureInfo.CurrentUICulture);
+    var (titleKey, textKey) = Model switch
+    {
+        404 => ("Status_404_Title", "Status_404_Text"),
+        429 => ("Status_429_Title", "Status_429_Text"),
+        400 => ("Status_400_Title", "Status_400_Text"),
+        _ => ("Status_Error_Title", "Status_Error_Text")
+    };
+
+    ViewData["Title"] = L[titleKey].Value;
+    ViewData["NoIndex"] = true;
+
+    // This page runs at /status/404 whatever address was asked for, so the
+    // language switcher points at the home page in each language.
+    var alternates = new AlternateUrls();
+    foreach (var code in CultureConstants.SupportedRouteCodes)
+    {
+        alternates.Set(code, Url.Action("Index", "Home", new { area = "", culture = code }) ?? $"/{code}");
+    }
+    ViewData[AlternateUrls.ViewDataKey] = alternates;
+}
+
+<div class="shell status-page">
+    <p class="status-code" aria-hidden="true">@Model</p>
+    <h1>@L[titleKey]</h1>
+    <p class="status-text">@L[textKey]</p>
+
+    @if (Model == 404)
+    {
+        <form class="status-search" asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index" method="get" role="search">
+            <label class="visually-hidden" for="status-q">@L["Search_Submit"]</label>
+            <input id="status-q" type="search" name="q" placeholder="@L["Search_Placeholder"]" />
+            <button type="submit" class="btn-shop">@L["Search_Submit"]</button>
+        </form>
+    }
+
+    <p class="status-links">
+        <a asp-area="" asp-route-culture="@routeCode" asp-controller="Home" asp-action="Index">@L["Status_Home"]</a>
+        <a asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index">@L["Footer_AllProducts"]</a>
+        <a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Contact">@L["Footer_Contact"]</a>
+    </p>
+</div>

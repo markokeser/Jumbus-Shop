@@ -1,0 +1,14 @@
+@{
+    var feature = ViewData["Feature"] as string ?? "";
+    var phase = ViewData["Phase"] as int? ?? 0;
+    ViewData["Title"] = feature;
+}
+
+<div class="shell sec">
+    <h1>@feature</h1>
+    <p class="blurb">@string.Format(L["ComingSoon_Body"].Value, phase)</p>
+
+    <p style="margin-top:24px">
+        <a class="btn-shop btn-quiet" asp-controller="Home" asp-action="Index">@L["Common_BackHome"]</a>
+    </p>
+</div>

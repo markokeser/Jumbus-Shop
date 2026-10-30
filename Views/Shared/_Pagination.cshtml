@@ -1,0 +1,66 @@
+@model WebShop.ViewModels.Catalog.ProductListViewModel
+@{
+    var action = Model.Category is null ? "Index" : "Category";
+
+    // Built as path + query string rather than through asp-all-route-data:
+    // that helper takes a dictionary, and the filters need repeated keys
+    // (?color=black&color=navy) to survive a page change.
+    var path = Url.Action(action, "Products", new { categorySlug = Model.Category?.Slug });
+
+    string Link(int page) => path + Model.Query.ToQueryString(page).ToUriComponent();
+
+    // A window around the current page: first, last, and two either side.
+    var pages = new List<int>();
+    for (var i = 1; i <= Model.PageCount; i++)
+    {
+        if (i == 1 || i == Model.PageCount || Math.Abs(i - Model.Query.Page) <= 2)
+        {
+            pages.Add(i);
+        }
+    }
+}
+
+@if (Model.PageCount > 1)
+{
+    <nav class="pager" aria-label="@L["Pager_Label"]">
+        @if (Model.HasPreviousPage)
+        {
+            <a href="@Link(Model.Query.Page - 1)" rel="prev">@L["Pager_Previous"]</a>
+        }
+        else
+        {
+            <span class="off">@L["Pager_Previous"]</span>
+        }
+
+        <span class="pager-pages">
+            @{ var previous = 0; }
+            @foreach (var page in pages)
+            {
+                if (previous > 0 && page - previous > 1)
+                {
+                    <span class="gap">&hellip;</span>
+                }
+
+                if (page == Model.Query.Page)
+                {
+                    <span class="on" aria-current="page">@(page)</span>
+                }
+                else
+                {
+                    <a href="@Link(page)">@(page)</a>
+                }
+
+                previous = page;
+            }
+        </span>
+
+        @if (Model.HasNextPage)
+        {
+            <a href="@Link(Model.Query.Page + 1)" rel="next">@L["Pager_Next"]</a>
+        }
+        else
+        {
+            <span class="off">@L["Pager_Next"]</span>
+        }
+    </nav>
+}

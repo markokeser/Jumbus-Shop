@@ -1,0 +1,82 @@
+@model AdminOrderListViewModel
+@{
+    ViewData["Title"] = L["Admin_Orders"].Value;
+    var statuses = Enum.GetValues<OrderStatus>();
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Orders"]</h1>
+
+    <form class="adm-search" method="get" asp-area="Admin" asp-controller="Orders" asp-action="Index" role="search">
+        @if (Model.Query.Status is { } current)
+        {
+            <input type="hidden" name="status" value="@current" />
+        }
+        <input type="search" name="q" value="@Model.Query.Q" placeholder="@L["Admin_OrderSearch"]" aria-label="@L["Admin_OrderSearch"]" />
+        <button type="submit" class="btn-shop btn-quiet">@L["Search_Submit"]</button>
+    </form>
+</header>
+
+<nav class="adm-tabs" aria-label="@L["Admin_Status"]">
+    <a class="@(Model.Query.Status is null ? "on" : null)"
+       asp-area="Admin" asp-controller="Orders" asp-action="Index" asp-route-q="@Model.Query.Q">
+        @L["Admin_All"] <span>@Model.AllCount</span>
+    </a>
+    @foreach (var status in statuses)
+    {
+        <a class="@(Model.Query.Status == status ? "on" : null)"
+           asp-area="Admin" asp-controller="Orders" asp-action="Index" asp-route-status="@status" asp-route-q="@Model.Query.Q">
+            @L["OrderStatus_" + status] <span>@Model.Counts.GetValueOrDefault(status)</span>
+        </a>
+    }
+</nav>
+
+<section class="adm-card adm-card-flush">
+    @if (Model.Orders.Count == 0)
+    {
+        <p class="adm-empty">@L["Admin_NothingFound"]</p>
+    }
+    else
+    {
+        <table class="adm-table adm-table-cards">
+            <thead>
+                <tr>
+                    <th>@L["Track_Number"]</th>
+                    <th>@L["Admin_Customer"]</th>
+                    <th>@L["Checkout_City"]</th>
+                    <th class="num">@L["Admin_Items"]</th>
+                    <th class="num">@L["Totals_Total"]</th>
+                    <th>@L["Checkout_Payment"]</th>
+                    <th>@L["Admin_Status"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td data-label="@L["Track_Number"]">
+                            <a class="adm-strong" asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderNumber">@order.OrderNumber</a>
+                            <small>@ShopTime.DateAndTime(order.PlacedUtc)</small>
+                        </td>
+                        <td data-label="@L["Admin_Customer"]">
+                            @order.Customer
+                            <small>@order.Email @if (order.IsGuest) { <i class="adm-tag">@L["Admin_Guest"]</i> }</small>
+                        </td>
+                        <td data-label="@L["Checkout_City"]">@order.City</td>
+                        <td class="num" data-label="@L["Admin_Items"]">@order.ItemCount</td>
+                        <td class="num adm-strong" data-label="@L["Totals_Total"]">@MoneyFormatter.Format(order.Total, order.Currency)</td>
+                        <td data-label="@L["Checkout_Payment"]">
+                            @L["Payment_" + order.PaymentMethod]
+                            <small>@L["PaymentStatus_" + order.PaymentStatus]</small>
+                        </td>
+                        <td data-label="@L["Admin_Status"]">
+                            <span class="status st-@order.Status.ToString().ToLowerInvariant()">@L["OrderStatus_" + order.Status]</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+<partial name="_AdminPager" model="Model.Page" />

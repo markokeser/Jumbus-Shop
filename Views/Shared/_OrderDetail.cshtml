@@ -1,0 +1,133 @@
+@model WebShop.Models.Orders.Order
+@using WebShop.Models.Orders
+@{
+    // The four steps an order walks through. Cancelled and returned orders
+    // leave that path, so they get a banner instead of a half-filled track.
+    var steps = new (OrderStatus Status, DateTime? When)[]
+    {
+        (OrderStatus.New, Model.PlacedUtc),
+        (OrderStatus.Confirmed, Model.ConfirmedUtc),
+        (OrderStatus.Shipped, Model.ShippedUtc),
+        (OrderStatus.Delivered, Model.DeliveredUtc)
+    };
+
+    var offTrack = Model.Status is OrderStatus.Cancelled or OrderStatus.Returned;
+    var reached = offTrack ? -1 : Array.FindIndex(steps, s => s.Status == Model.Status);
+}
+
+<header class="od-head">
+    <div>
+        <h1>@string.Format(L["Confirm_Title"].Value, Model.OrderNumber)</h1>
+        <p class="od-when">@string.Format(L["Orders_PlacedOn"].Value, ShopTime.DateAndTime(Model.PlacedUtc))</p>
+    </div>
+    <span class="status st-@Model.Status.ToString().ToLowerInvariant()">@L["OrderStatus_" + Model.Status]</span>
+</header>
+
+@if (offTrack)
+{
+    <div class="notice notice-bad"><p>@L["OrderStatusNote_" + Model.Status]</p></div>
+}
+else
+{
+    <ol class="track">
+        @for (var i = 0; i < steps.Length; i++)
+        {
+            var step = steps[i];
+            var state = i < reached ? "done" : i == reached ? "now" : "todo";
+
+            <li class="@state">
+                <span class="track-dot"></span>
+                <b>@L["OrderStatus_" + step.Status]</b>
+                @if (i <= reached && step.When is { } when)
+                {
+                    <small>@ShopTime.Date(when)</small>
+                }
+            </li>
+        }
+    </ol>
+}
+
+@if (!string.IsNullOrEmpty(Model.TrackingNumber))
+{
+    <p class="od-tracking">
+        @string.Format(L["Orders_Tracking"].Value, Model.CourierName, Model.TrackingNumber)
+    </p>
+}
+
+<div class="confirm-grid">
+    <section>
+        <h2>@L["Confirm_Items"]</h2>
+        <ul class="mini-lines">
+            @foreach (var item in Model.Items)
+            {
+                <li>
+                    <span class="mini-qty">@item.Quantity&#215;</span>
+                    <span class="mini-name">
+                        @item.ProductName
+                        @if (!string.IsNullOrEmpty(item.VariantDescription))
+                        {
+                            <small>@item.VariantDescription</small>
+                        }
+                    </span>
+                    <span class="mini-sum">@MoneyFormatter.Format(item.LineTotal, Model.Currency)</span>
+                </li>
+            }
+        </ul>
+
+        <dl class="totals">
+            <div>
+                <dt>@L["Totals_Subtotal"]</dt>
+                <dd>@MoneyFormatter.Format(Model.Subtotal, Model.Currency)</dd>
+            </div>
+            @if (Model.DiscountAmount > 0)
+            {
+                <div class="totals-discount">
+                    <dt>@L["Totals_Discount"]</dt>
+                    <dd>&#8722;@MoneyFormatter.Format(Model.DiscountAmount, Model.Currency)</dd>
+                </div>
+            }
+            <div>
+                <dt>@L["Totals_Shipping"]</dt>
+                <dd>
+                    @if (Model.ShippingFee <= 0)
+                    {
+                        <span class="free">@L["Totals_FreeShipping"]</span>
+                    }
+                    else
+                    {
+                        @MoneyFormatter.Format(Model.ShippingFee, Model.Currency)
+                    }
+                </dd>
+            </div>
+            <div class="totals-sum">
+                <dt>@L["Totals_Total"]</dt>
+                <dd>@MoneyFormatter.Format(Model.Total, Model.Currency)</dd>
+            </div>
+            <div class="totals-vat">
+                <dt>@string.Format(L["Totals_VatIncluded"].Value, (Model.VatRate * 100).ToString("0.##"))</dt>
+                <dd>@MoneyFormatter.Format(Model.VatAmount, Model.Currency)</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section>
+        <h2>@L["Confirm_Delivery"]</h2>
+        <address class="confirm-address">
+            @Model.FirstName @Model.LastName<br />
+            @Model.ShippingStreet @Model.ShippingStreetNumber<br />
+            @Model.ShippingPostalCode @Model.ShippingCity<br />
+            @Model.PhoneNumber
+        </address>
+
+        <dl class="pdp-facts">
+            <div>
+                <dt>@L["Checkout_Courier"]</dt>
+                <dd>@Model.CourierName</dd>
+            </div>
+            <div>
+                <dt>@L["Checkout_Payment"]</dt>
+                <dd>@L["Payment_" + Model.PaymentMethod] &#8212; @L["PaymentStatus_" + Model.PaymentStatus]</dd>
+            </div>
+        </dl>
+    </section>
+</div>

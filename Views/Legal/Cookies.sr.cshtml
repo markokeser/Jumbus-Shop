@@ -1,0 +1,55 @@
+@model ConsentChoice?
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Kolačići";
+    ViewData["MetaDescription"] = $"Koje kolačiće {shop.Name} koristi i kako da promenite svoj izbor.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">Važi od 30. oktobra 2026.</p>
+
+        <p>Kolačić je mala datoteka koju sajt čuva u vašem pregledaču. Koristimo <strong>samo neophodne kolačiće</strong>: bez njih ne biste mogli da se prijavite, da imate korpu ni da sajt zapamti jezik. Za njih zakon ne traži pristanak, a u njima nema ničega po čemu bismo vas pratili na drugim sajtovima.</p>
+        <p>Ne koristimo analitiku, oglasne mreže ni kolačiće drugih firmi. Fontove i slike šaljemo sa sopstvenog servera, pa otvaranje stranice ne javlja vašu adresu nikome drugom. Ako to ikada promenimo, takvi kolačići će se postavljati tek kada ih prihvatite.</p>
+
+        <table class="legal-table">
+            <thead>
+                <tr><th scope="col">Kolačić</th><th scope="col">Čemu služi</th><th scope="col">Koliko traje</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>.AspNetCore.Identity.Application</code></td><td>prijava na nalog</td><td>14 dana ako izaberete „Zapamti me", inače do zatvaranja pregledača</td></tr>
+                <tr><td><code>.WebShop.Session</code></td><td>korpa i podaci tokom porudžbine</td><td>do zatvaranja pregledača</td></tr>
+                <tr><td><code>.AspNetCore.Culture</code></td><td>izabrani jezik</td><td>godinu dana</td></tr>
+                <tr><td><code>.AspNetCore.Antiforgery.…</code></td><td>zaštita formulara od zloupotrebe sa drugih sajtova</td><td>do zatvaranja pregledača</td></tr>
+                <tr><td><code>.AspNetCore.Mvc.CookieTempDataProvider</code></td><td>kratka poruka posle radnje, npr. „Sačuvano"</td><td>do sledeće stranice</td></tr>
+                <tr><td><code>@CookieConsent.CookieName</code></td><td>vaš izbor sa ove stranice</td><td>6 meseci</td></tr>
+            </tbody>
+        </table>
+
+        <section class="legal-choice" id="izbor">
+            <h2>Vaš izbor</h2>
+            <p>
+                @(Model switch
+                {
+                    ConsentChoice.All => "Prihvatili ste sve kolačiće.",
+                    ConsentChoice.Necessary => "Izabrali ste samo neophodne kolačiće.",
+                    _ => "Još niste izabrali."
+                })
+                Izbor možete da promenite kad god hoćete.
+            </p>
+            <form method="post" asp-action="Consent" class="legal-choice-acts">
+                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + "#izbor")" />
+                <button type="submit" name="choice" value="necessary" class="btn-shop btn-quiet">@L["Cookie_OnlyNecessary"]</button>
+                <button type="submit" name="choice" value="all" class="btn-shop btn-quiet">@L["Cookie_AcceptAll"]</button>
+            </form>
+        </section>
+
+        <h2>Brisanje kolačića</h2>
+        <p>Kolačiće možete da obrišete u podešavanjima pregledača. Posle toga ćete biti odjavljeni, korpa gosta će se isprazniti, a pitanje o kolačićima će se ponovo pojaviti.</p>
+
+        <p>Više o tome kako postupamo sa podacima piše u <a asp-action="Privacy">Politici privatnosti</a>.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

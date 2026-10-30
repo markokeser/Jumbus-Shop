@@ -1,0 +1,8 @@
+@model int
+@* Only a count worth reading; an empty bag shows just the icon. The old
+   "empty" class collided with the empty-state block and stretched the
+   badge to 90px. *@
+@if (Model > 0)
+{
+    <span class="hd-count">@Model</span>
+}

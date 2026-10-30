@@ -1,0 +1,142 @@
+@model HomeIndexViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ShopSettings> ShopOptions
+@inject IWebHostEnvironment Env
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = L["Home_Tagline"].Value;
+    ViewData["MetaDescription"] = L["Home_Intro"].Value;
+}
+
+@section Head {
+    @{
+        var homeUrl = SiteUrls.Origin(Context, shop) + Context.Request.Path;
+    }
+    @* Who runs the shop, for the knowledge panel and the site name in results. *@
+    @StructuredData.Script(
+        StructuredData.Organization(shop, homeUrl),
+        StructuredData.WebSite(shop, homeUrl, System.Globalization.CultureInfo.CurrentUICulture.Name))
+}
+
+<section class="hero">
+    <div class="shell hero-in">
+        <div>
+            <h1>@L["Home_Tagline"]</h1>
+            <p class="hero-lede">@L["Home_Intro"]</p>
+
+            <div class="facts">
+                <div>
+                    <b>@Model.Hero.VariantsInStock</b>
+                    <small>@L["Fact_InStock"]</small>
+                </div>
+                <div>
+                    <b>@Model.Hero.FreeShippingThreshold.ToString("N0")</b>
+                    <small>@string.Format(L["Fact_FreeShipping"].Value, shop.Currency)</small>
+                </div>
+                <div>
+                    <b>@Model.Hero.ReturnDays</b>
+                    <small>@L["Fact_Returns"]</small>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Hero.HasSpec)
+        {
+            @* Every value below is read from the attribute tables, so it stays
+               honest as the catalogue grows. *@
+            <aside class="spec">
+                <h2>@L["Spec_Heading"]</h2>
+                <p class="spec-lede">@L["Spec_Body"]</p>
+
+                @if (Model.Hero.SizeLabels.Count > 0)
+                {
+                    <div class="spec-lbl">
+                        <span>@Model.Hero.SizeAttributeName</span>
+                        <span>@Model.Hero.SizeLabels[0]&#8211;@Model.Hero.SizeLabels[^1]</span>
+                    </div>
+                    <div class="sizes">
+                        @foreach (var size in Model.Hero.SizeLabels)
+                        {
+                            <b>@size</b>
+                        }
+                    </div>
+                }
+
+                @if (Model.Hero.Shades.Count > 0)
+                {
+                    <div class="spec-lbl">
+                        <span>@Model.Hero.ShadeAttributeName</span>
+                        <span>@string.Format(L["Spec_ShadeCount"].Value, Model.Hero.Shades.Count)</span>
+                    </div>
+                    <div class="shades">
+                        @foreach (var shade in Model.Hero.Shades)
+                        {
+                            <div>
+                                <i style="background:@shade.Hex" title="@shade.Label"></i>
+                                <em>@shade.ShortLabel</em>
+                            </div>
+                        }
+                    </div>
+                }
+            </aside>
+        }
+    </div>
+</section>
+
+@if (Model.Featured.Count > 0)
+{
+    <section class="sec">
+        <div class="shell">
+            <div class="sec-hd">
+                <h2>@L["Home_Featured"]</h2>
+                <a asp-controller="Products" asp-action="Index">
+                    @string.Format(L["Common_ViewAllCount"].Value, Model.BuildStatus.Products)
+                </a>
+            </div>
+
+            <div class="grid">
+                @foreach (var product in Model.Featured)
+                {
+                    <partial name="_ProductCard" model="product" />
+                }
+            </div>
+
+            @if (Env.IsDevelopment())
+            {
+                <div class="dev">
+                    <b>@L["Setup_Heading"]</b>
+                    <span>
+                        @Model.BuildStatus.Categories @L["Setup_Categories"] &nbsp;
+                        @Model.BuildStatus.Products @L["Setup_Products"] &nbsp;
+                        @Model.BuildStatus.Variants @L["Setup_Variants"] &nbsp;
+                        @Model.BuildStatus.InStock @L["Setup_InStock"]
+                    </span>
+                    <span class="tag">@L["Setup_DevOnly"]</span>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@if (Model.CategoryGroups.Count > 0)
+{
+    <section class="catband">
+        <div class="shell catgrid">
+            @foreach (var group in Model.CategoryGroups)
+            {
+                <div class="catcol">
+                    <h2>@group.Name</h2>
+
+                    @foreach (var child in group.Children)
+                    {
+                        <a asp-controller="Products" asp-action="Category" asp-route-categorySlug="@child.Slug">
+                            <span class="cn">@child.Name</span>
+                            <span class="cd">@child.Description</span>
+                            <span class="cc">@child.ProductCount</span>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+}

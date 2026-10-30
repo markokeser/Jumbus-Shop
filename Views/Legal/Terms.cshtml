@@ -1,0 +1,69 @@
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Terms of use and sale";
+    ViewData["MetaDescription"] = $"How buying at {shop.Name} works: ordering, prices, payment, delivery, withdrawal and complaints.";
+}
+@* English version of Terms.sr.cshtml. The Serbian text is the binding one;
+   keep the two in step when either changes. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">In force from 30 October 2026. This translation is provided for convenience; the Serbian version prevails.</p>
+
+        <h2>1. The seller</h2>
+        <p>The @shop.Name shop is run by:</p>
+        <partial name="_Company" />
+
+        <h2>2. Scope</h2>
+        <p>These terms apply to the use of this site and to every purchase made on it. By placing an order you confirm that you have read and accept them. If you buy as a consumer, you keep every right the Serbian Consumer Protection Act gives you; nothing in these terms limits them.</p>
+
+        <h2>3. Ordering and the contract</h2>
+        <ol>
+            <li>Choose a product, a size or shade, and add it to the cart.</li>
+            <li>At checkout, enter the delivery details and choose a courier and a payment method.</li>
+            <li>Before sending, you see a summary: the products and their prices, delivery, any discount and the total including VAT. You can still correct mistakes there.</li>
+            <li>The confirmation button sends an order with an obligation to pay. You get an order number straight away and an email confirming receipt.</li>
+            <li>The contract is concluded when we confirm the order, which we tell you by email.</li>
+        </ol>
+        <p>If a product runs out in the meantime, we contact you before shipping. You can then wait, pick another product or cancel; anything you have already paid is refunded without delay.</p>
+
+        <h2>4. Prices</h2>
+        <p>Prices are in Serbian dinars (RSD) and include VAT. Delivery costs are shown in the cart and at checkout before you place the order. The price shown when you place the order applies. A sale price applies for the period stated with the product.</p>
+
+        <h2>5. Payment</h2>
+        <ul>
+            <li><strong>Cash on delivery</strong> — you pay the courier in cash when you collect the parcel.</li>
+            <li><strong>Payment card</strong>, where offered at checkout — the payment is handled by a licensed payment processor; card details never pass through our system and we do not store them.</li>
+        </ul>
+
+        <h2>6. Delivery</h2>
+        <p>Delivery times, costs and couriers are described on the <a asp-action="Shipping">Delivery and payment</a> page. The risk of loss or damage passes to you when you, or a person you named, take the parcel.</p>
+
+        <h2>7. Withdrawal</h2>
+        <p>You may withdraw from a purchase within 14 days of receiving the goods, without giving a reason. The procedure, the exceptions and the form are on the <a asp-action="Returns">Returns and complaints</a> page.</p>
+
+        <h2>8. Conformity and complaints</h2>
+        <p>We are liable for the goods conforming to the contract as the law provides, for two years from delivery. How to make a complaint and how quickly we answer is set out on the <a asp-action="Returns">Returns and complaints</a> page.</p>
+
+        <h2>9. Customer account</h2>
+        <p>You do not need an account to buy. If you open one, you are responsible for keeping your details accurate and your password safe. You can delete the account at any time under <em>My data</em>; orders are kept for as long as the law requires, as the <a asp-action="Privacy">Privacy policy</a> explains.</p>
+
+        <h2>10. Reviews</h2>
+        <p>Signed-in customers can leave a review, which we read before publishing. We do not publish reviews that are offensive, contain someone else's personal data or advertising, or are plainly not about the product. Reviews are never paid for, and we do not remove them for being unfavourable.</p>
+
+        <h2>11. Site content</h2>
+        <p>The photographs, texts and design of this site belong to the seller or its partners and may not be used without permission. We take care that descriptions, measurements and colours are accurate; colours on screen can differ slightly from the real thing.</p>
+
+        <h2>12. Out-of-court dispute resolution</h2>
+        <p>If we have not resolved your complaint the way you expected, you can start out-of-court consumer dispute resolution before one of the bodies on the list kept by the ministry responsible for consumer protection. You need to have made the complaint to us first. Taking part is mandatory for us and free of charge for you. More on the <a asp-action="Returns" asp-fragment="vansudsko">Returns and complaints</a> page.</p>
+
+        <h2>13. Governing law</h2>
+        <p>These terms and contracts concluded through this site are governed by the law of the Republic of Serbia. Disputes go to the court the law designates.</p>
+
+        <h2>14. Changes</h2>
+        <p>We may change these terms; a new version applies from the day it is published on this page. Your order is governed by the terms that were published when you placed it.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

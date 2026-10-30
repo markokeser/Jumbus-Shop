@@ -1,0 +1,57 @@
+@{
+    var shop = Shop.Value;
+    var routeCode = CultureConstants.ToRouteCode(CultureInfo.CurrentUICulture);
+    var here = Context.Request.Path + Context.Request.QueryString;
+}
+<!DOCTYPE html>
+<html lang="@routeCode">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"] · @L["Nav_Admin"] · @shop.Name</title>
+
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="adm-body">
+    <a class="visually-hidden-focusable" href="#main">@L["Skip_ToContent"]</a>
+
+    <div class="adm">
+        <aside class="adm-side">
+            <div class="adm-top">
+                <a class="adm-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">@shop.Name<span>.</span></a>
+                <small>@L["Nav_Admin"]</small>
+            </div>
+
+            @await Component.InvokeAsync("AdminNav")
+
+            <div class="adm-foot">
+                <div class="adm-lang" role="group" aria-label="@L["Language_Label"]">
+                    @foreach (var code in CultureConstants.SupportedRouteCodes)
+                    {
+                        <a class="@(code == routeCode ? "on" : null)" lang="@code"
+                           asp-area="Admin" asp-controller="Language" asp-action="Set"
+                           asp-route-culture="@code" asp-route-returnUrl="@here">@CultureConstants.DisplayNames[code]</a>
+                    }
+                </div>
+                <a class="adm-shoplink" href="/@routeCode/">@L["Admin_ToShop"] &#8599;</a>
+                <span class="adm-user">@User.Identity?.Name</span>
+                <form asp-area="" asp-route-culture="@routeCode" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="linkbtn">@L["Nav_SignOut"]</button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="adm-main" id="main">
+            <partial name="_Flash" />
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

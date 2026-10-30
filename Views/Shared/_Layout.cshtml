@@ -1,0 +1,219 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Http.Features
+@using Microsoft.Extensions.Options
+@inject IOptions<ShopSettings> ShopOptions
+@{
+    var shop = ShopOptions.Value;
+    var company = shop.Company;
+    var routeCode = CultureConstants.ToRouteCode(CultureInfo.CurrentUICulture);
+    var pageTitle = ViewData["Title"] as string;
+    var fullTitle = string.IsNullOrEmpty(pageTitle) ? shop.Name : $"{pageTitle} — {shop.Name}";
+    var metaDescription = ViewData["MetaDescription"] as string ?? L["Home_Intro"].Value;
+    var origin = SiteUrls.Origin(Context, shop);
+
+    // Personal and transactional pages stay out of search results whatever
+    // the view says; filtered and paged listings opt out through NoIndex.
+    var controller = ViewContext.RouteData.Values["controller"] as string ?? string.Empty;
+    string[] privateControllers = ["Cart", "Checkout", "Account", "Addresses", "Orders", "Wishlist", "Status"];
+    var noIndex = ViewData["NoIndex"] is true
+        || privateControllers.Contains(controller, StringComparer.OrdinalIgnoreCase);
+
+    var canonical = origin + Context.Request.Path;
+
+    // Catalog URLs carry translated slugs, so /sr/haljine is /en/dresses and
+    // not /en/haljine. Those pages register their real counterparts; every
+    // other page has no translated part in its path, so swapping the prefix
+    // is the right answer for them.
+    var alternates = ViewData[AlternateUrls.ViewDataKey] as AlternateUrls;
+
+    string UrlForCulture(string code) =>
+        alternates?.For(code) ?? CultureUrlHelper.SwitchCulture(Context.Request, code);
+
+    // "sr-Latn-RS" -> "sr_RS", the form Open Graph expects.
+    static string OgLocale(string code)
+    {
+        var parts = CultureConstants.RouteToCulture[code].Split('-');
+        return $"{parts[0]}_{parts[^1]}";
+    }
+
+    var ogImage = ViewData["OgImage"] is string image && image.Length > 0
+        ? SiteUrls.Absolute(Context, shop, image)
+        : null;
+
+    var freeShipping = MoneyFormatter.Format(shop.FreeShippingThreshold, shop.Currency);
+    var canTrack = Context.Features.Get<ITrackingConsentFeature>()?.CanTrack == true;
+}
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.Name">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@fullTitle</title>
+    <meta name="description" content="@metaDescription" />
+
+    @if (noIndex)
+    {
+        <meta name="robots" content="noindex,follow" />
+    }
+    else
+    {
+        @* A noindex page gets neither: a canonical or hreflang pointing at a
+           page that asks not to be indexed sends search engines mixed signals. *@
+        <link rel="canonical" href="@canonical" />
+
+        @foreach (var code in CultureConstants.SupportedRouteCodes)
+        {
+            <link rel="alternate" hreflang="@code" href="@(origin + UrlForCulture(code))" />
+        }
+        <link rel="alternate" hreflang="x-default" href="@(origin + UrlForCulture(CultureConstants.Default))" />
+    }
+
+    @* Link previews in messengers and social networks. *@
+    <meta property="og:site_name" content="@shop.Name" />
+    <meta property="og:type" content="@(ViewData["OgType"] as string ?? "website")" />
+    <meta property="og:title" content="@(pageTitle ?? shop.Name)" />
+    <meta property="og:description" content="@metaDescription" />
+    <meta property="og:url" content="@canonical" />
+    <meta property="og:locale" content="@OgLocale(routeCode)" />
+    @foreach (var code in CultureConstants.SupportedRouteCodes.Where(c => c != routeCode))
+    {
+        <meta property="og:locale:alternate" content="@OgLocale(code)" />
+    }
+    @if (ogImage is not null)
+    {
+        <meta property="og:image" content="@ogImage" />
+        <meta name="twitter:card" content="summary_large_image" />
+    }
+    else
+    {
+        <meta name="twitter:card" content="summary" />
+    }
+
+    @* Newsreader is an editorial serif that keeps its weight at display sizes,
+       where a didone would go spindly. Archivo carries the interface and the
+       data. Both are served from the shop itself, so a page view sends the
+       visitor's address to no one else, and both cover latin-ext. *@
+    <link rel="preload" href="~/fonts/archivo-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+    <a class="skip-link" href="#main">@L["Skip_ToContent"]</a>
+
+    <div class="announce">@string.Format(L["Announcement_FreeShipping"].Value, freeShipping)</div>
+
+    <header class="hd">
+        <div class="shell hd-in">
+            <a class="hd-mark" asp-area="" asp-route-culture="@routeCode" asp-controller="Home" asp-action="Index">@shop.Name<span>.</span></a>
+
+            @await Component.InvokeAsync("CategoryNav")
+
+            <div class="hd-acts">
+                <div class="hd-lang" role="group" aria-label="@L["Language_Label"]">
+                    @foreach (var code in CultureConstants.SupportedRouteCodes)
+                    {
+                        <a class="@(code == routeCode ? "on" : null)" href="@UrlForCulture(code)" hreflang="@code" lang="@code"
+                           title="@CultureConstants.DisplayNames[code]">@code.ToUpperInvariant()</a>
+                    }
+                </div>
+
+                <details class="hd-search">
+                    <summary aria-label="@L["Search_Submit"]"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg></summary>
+                    <form class="hd-search-form" asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index" method="get" role="search">
+                        <div class="shell hd-search-in">
+                            <label class="visually-hidden" for="site-search">@L["Search_Submit"]</label>
+                            <input id="site-search" type="search" name="q" placeholder="@L["Search_Placeholder"]" />
+                            <button type="submit" class="btn-shop">@L["Search_Submit"]</button>
+                        </div>
+                    </form>
+                </details>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole(ApplicationRoles.Admin))
+                    {
+                        <a class="hd-admin" href="/admin">@L["Nav_Admin"]</a>
+                    }
+                    <a class="hd-icon" asp-area="" asp-route-culture="@routeCode" asp-controller="Account" asp-action="Index"
+                       aria-label="@L["Nav_Account"]" title="@L["Nav_Account"]"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4" /><path d="M4.5 20.5c1.4-3.8 4.2-5.5 7.5-5.5s6.1 1.7 7.5 5.5" /></svg></a>
+                }
+                else
+                {
+                    <a class="hd-icon" asp-area="" asp-route-culture="@routeCode" asp-controller="Account" asp-action="Login"
+                       asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                       aria-label="@L["Nav_SignIn"]" title="@L["Nav_SignIn"]"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4" /><path d="M4.5 20.5c1.4-3.8 4.2-5.5 7.5-5.5s6.1 1.7 7.5 5.5" /></svg></a>
+                }
+                <a class="hd-icon hd-wish" asp-area="" asp-route-culture="@routeCode" asp-controller="Wishlist" asp-action="Index"
+                   aria-label="@L["Nav_Wishlist"]" title="@L["Nav_Wishlist"]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20z" /></svg></a>
+                <a class="hd-icon" asp-area="" asp-route-culture="@routeCode" asp-controller="Cart" asp-action="Index"
+                   aria-label="@L["Nav_Cart"]" title="@L["Nav_Cart"]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12.5H6L5 8z" /><path d="M9 8V6.5a3 3 0 0 1 6 0V8" /></svg>@await Component.InvokeAsync("CartBadge")</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main">
+        @RenderBody()
+    </main>
+
+    <footer class="ft">
+        <div class="shell">
+            <div class="ftg">
+                <div>
+                    <div class="ftmark">@shop.Name.</div>
+                    <p class="ftabout">@L["Footer_About"]</p>
+                </div>
+
+                <div>
+                    <h2>@L["Footer_Shop"]</h2>
+                    <ul>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index">@L["Footer_AllProducts"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="SizeGuide">@L["Footer_SizeGuide"]</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2>@L["Footer_Help"]</h2>
+                    <ul>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Shipping">@L["Footer_Shipping"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Returns">@L["Footer_Returns"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Orders" asp-action="Track">@L["Footer_TrackOrder"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Contact">@L["Footer_Contact"]</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2>@L["Footer_Legal"]</h2>
+                    <ul>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Terms">@L["Footer_Terms"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Privacy">@L["Footer_Privacy"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Cookies">@L["Footer_Cookies"]</a></li>
+                        <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="WithdrawalForm">@L["Footer_WithdrawalForm"]</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="ftnote">
+                <span>&copy; @DateTime.Now.Year @shop.Name. @L["Footer_Rights"]</span>
+                @* The seller's identity, which a distance seller must publish. *@
+                <span>@company.LegalName · @company.Address · @L["Legal_TaxIdShort"] @company.TaxId · @L["Legal_RegNoShort"] @company.RegistrationNumber</span>
+            </div>
+        </div>
+    </footer>
+
+    <partial name="_CookieBanner" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @if (canTrack)
+    {
+        @* Analytics and marketing tags go here and nowhere else: this block
+           renders only after the visitor chose "Accept all", which is what
+           the law asks of anything that is not strictly necessary. *@
+    }
+</body>
+</html>

@@ -1,0 +1,50 @@
+@model IReadOnlyList<WebShop.ViewModels.Navigation.CategoryNavGroup>
+@using System.Globalization
+@{
+    // Stated explicitly: this renders on pages whose route carries no language.
+    var routeCode = CultureConstants.ToRouteCode(CultureInfo.CurrentUICulture);
+}
+
+@* Desktop: top-level categories in the header row, subcategories on hover or focus. *@
+<nav class="hd-nav" aria-label="@L["Nav_Menu"]">
+    @foreach (var group in Model)
+    {
+        <div class="hd-nav-item">
+            <a asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Category" asp-route-categorySlug="@group.Slug">@group.Name</a>
+            @if (group.Children.Count > 0)
+            {
+                <div class="hd-drop">
+                    <ul>
+                        @foreach (var child in group.Children)
+                        {
+                            <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Category" asp-route-categorySlug="@child.Slug">@child.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }
+    <a asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index">@L["Nav_New"]</a>
+    <a class="hd-nav-sale" asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index" asp-route-sale="true">@L["Nav_Sale"]</a>
+</nav>
+
+@* Phone: the same menu behind a button, no script needed. *@
+<details class="hd-menu">
+    <summary aria-label="@L["Nav_Menu"]">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" /></svg>
+    </summary>
+    <div class="hd-menu-panel">
+        @foreach (var group in Model)
+        {
+            <a class="hd-menu-group" asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Category" asp-route-categorySlug="@group.Slug">@group.Name</a>
+            <ul>
+                @foreach (var child in group.Children)
+                {
+                    <li><a asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Category" asp-route-categorySlug="@child.Slug">@child.Name</a></li>
+                }
+            </ul>
+        }
+        <a class="hd-menu-group" asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index">@L["Nav_New"]</a>
+        <a class="hd-menu-group hd-nav-sale" asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Index" asp-route-sale="true">@L["Nav_Sale"]</a>
+    </div>
+</details>

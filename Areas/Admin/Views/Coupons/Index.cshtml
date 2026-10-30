@@ -1,0 +1,90 @@
+@model List<CouponRow>
+@{
+    ViewData["Title"] = L["Admin_Coupons"].Value;
+    var currency = Shop.Value.Currency;
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Coupons"]</h1>
+    <a class="btn-shop" asp-area="Admin" asp-controller="Coupons" asp-action="Create">@L["Admin_NewCoupon"]</a>
+</header>
+
+<section class="adm-card adm-card-flush">
+    @if (Model.Count == 0)
+    {
+        <p class="adm-empty">@L["Admin_NoCoupons"]</p>
+    }
+    else
+    {
+        <table class="adm-table adm-table-cards">
+            <thead>
+                <tr>
+                    <th>@L["Admin_Code"]</th>
+                    <th>@L["Admin_Discount"]</th>
+                    <th>@L["Admin_Conditions"]</th>
+                    <th>@L["Admin_Valid"]</th>
+                    <th class="num">@L["Admin_Used"]</th>
+                    <th>@L["Admin_Status"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var coupon in Model)
+                {
+                    <tr class="@(coupon.State == CouponState.Active ? null : "is-off")">
+                        <td data-label="@L["Admin_Code"]">
+                            <a class="adm-strong" asp-area="Admin" asp-controller="Coupons" asp-action="Edit" asp-route-id="@coupon.Id"><code>@coupon.Code</code></a>
+                        </td>
+                        <td data-label="@L["Admin_Discount"]">
+                            @switch (coupon.DiscountType)
+                            {
+                                case DiscountType.Percentage:
+                                    @($"{coupon.Value:0.##} %")
+                                    break;
+                                case DiscountType.FixedAmount:
+                                    @MoneyFormatter.Format(coupon.Value, currency)
+                                    break;
+                                default:
+                                    @L["Admin_FreeShipping"]
+                                    break;
+                            }
+                        </td>
+                        <td data-label="@L["Admin_Conditions"]">
+                            @if (coupon.MinimumSubtotal is { } minimum)
+                            {
+                                <span>@string.Format(L["Admin_MinOrder"].Value, MoneyFormatter.Format(minimum, currency))</span>
+                            }
+                            @if (coupon.Category is not null)
+                            {
+                                <small>@coupon.Category</small>
+                            }
+                            @if (coupon.MinimumSubtotal is null && coupon.Category is null)
+                            {
+                                <span class="adm-of">&#8212;</span>
+                            }
+                        </td>
+                        <td data-label="@L["Admin_Valid"]">
+                            @(coupon.StartsUtc is { } s ? ShopTime.Date(s) : "…") &#8211; @(coupon.EndsUtc is { } e ? ShopTime.Date(e) : "…")
+                        </td>
+                        <td class="num" data-label="@L["Admin_Used"]">@coupon.TimesUsed@(coupon.UsageLimit is { } limit ? $" / {limit}" : null)</td>
+                        <td data-label="@L["Admin_Status"]">
+                            <span class="adm-pill pill-coupon-@coupon.State.ToString().ToLowerInvariant()">@L["CouponState_" + coupon.State]</span>
+                        </td>
+                        <td class="adm-row-actions">
+                            @if (coupon.TimesUsed == 0)
+                            {
+                                <form method="post" asp-area="Admin" asp-controller="Coupons" asp-action="Delete" asp-route-id="@coupon.Id" data-confirm="@L["Admin_ConfirmDelete"]">
+                                    <button type="submit" class="linkish quiet">@L["Admin_Delete"]</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ConfirmScript" />
+}

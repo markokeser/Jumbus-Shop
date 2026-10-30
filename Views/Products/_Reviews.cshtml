@@ -1,0 +1,125 @@
+@model WebShop.ViewModels.Catalog.ProductDetailsViewModel
+@using WebShop.ViewModels.Reviews
+@{
+    var summary = Model.Reviews;
+    var result = TempData["ReviewResult"] as string;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<section id="reviews" class="reviews">
+    <h2>@L["Reviews_Title"]</h2>
+
+    @if (result is { Length: > 0 })
+    {
+        <div class="notice @(result == "Submitted" ? "notice-good" : "notice-bad")">
+            <p>@L["ReviewResult_" + result]</p>
+        </div>
+    }
+
+    @if (summary.Count > 0)
+    {
+        @* Numbers and a distribution rather than a row of star icons: the rest
+           of the shop reads as a catalogue of facts, and "4,6 of 5 from 12"
+           with the spread visible says more than five little shapes. *@
+        <div class="rsum">
+            <div class="rsum-score">
+                <b>@summary.Average.ToString("0.0")</b>
+                <span>@string.Format(L["Reviews_OutOf"].Value, summary.Count)</span>
+            </div>
+
+            <div class="rsum-bars">
+                @for (var stars = 5; stars >= 1; stars--)
+                {
+                    <div class="rbar">
+                        <span class="rbar-label">@stars</span>
+                        <span class="rbar-track"><i style="width:@summary.Percent(stars)%"></i></span>
+                        <span class="rbar-count">@summary.Distribution[stars - 1]</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="rlist">
+            @foreach (var review in summary.Reviews)
+            {
+                <article class="review">
+                    <header>
+                        <span class="rating-num">@review.Rating / 5</span>
+                        @if (!string.IsNullOrEmpty(review.Title))
+                        {
+                            <h3>@review.Title</h3>
+                        }
+                    </header>
+
+                    @if (!string.IsNullOrEmpty(review.Body))
+                    {
+                        <p>@review.Body</p>
+                    }
+
+                    <footer>
+                        <span>@review.AuthorName</span>
+                        <span>@ShopTime.Date(review.CreatedUtc)</span>
+                        @if (review.IsVerifiedPurchase)
+                        {
+                            <span class="verified">@L["Reviews_Verified"]</span>
+                        }
+                    </footer>
+                </article>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="acct-empty">@L["Reviews_None"]</p>
+    }
+
+    @if (summary.OwnState == OwnReviewState.Pending)
+    {
+        <p class="reviews-own">@L["Reviews_OwnPending"]</p>
+    }
+    else if (summary.OwnState == OwnReviewState.Published)
+    {
+        <p class="reviews-own">@L["Reviews_OwnPublished"]</p>
+    }
+    else if (summary.CanReview)
+    {
+        <form method="post" asp-controller="Reviews" asp-action="Submit" class="rform">
+            <input type="hidden" name="productId" value="@Model.Id" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+            <h3>@L["Reviews_Write"]</h3>
+
+            <fieldset class="rstars">
+                <legend>@L["Reviews_YourRating"]</legend>
+                <div class="fchecks">
+                    @for (var stars = 1; stars <= 5; stars++)
+                    {
+                        <label class="fcheck">
+                            <input type="radio" name="Rating" value="@stars" required />
+                            <span>@stars</span>
+                        </label>
+                    }
+                </div>
+            </fieldset>
+
+            <div class="cinput">
+                <label for="review-title">@L["Reviews_TitleLabel"]</label>
+                <input id="review-title" name="Title" maxlength="200" />
+            </div>
+
+            <div class="cinput">
+                <label for="review-body">@L["Reviews_BodyLabel"]</label>
+                <textarea id="review-body" name="Body" rows="4" maxlength="4000"></textarea>
+            </div>
+
+            <p class="hint">@L["Reviews_Moderated"]</p>
+            <button type="submit" class="btn-shop">@L["Reviews_Send"]</button>
+        </form>
+    }
+    else if (!summary.IsSignedIn)
+    {
+        <p class="reviews-own">
+            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@(returnUrl + "#reviews")">@L["Reviews_SignInToWrite"]</a>
+        </p>
+    }
+</section>

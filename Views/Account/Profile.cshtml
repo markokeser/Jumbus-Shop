@@ -1,0 +1,59 @@
+@model WebShop.ViewModels.Account.ProfileViewModel
+@{
+    ViewData["Title"] = L["Account_Profile"].Value;
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Profile";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <h1>@L["Account_Profile"]</h1>
+
+        @if (TempData["Saved"] is true)
+        {
+            <div class="notice notice-good"><p>@L["Account_Saved"]</p></div>
+        }
+
+        <form method="post" asp-controller="Account" asp-action="Profile" class="acct-form">
+            <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+
+            <div class="cinput">
+                <label>@L["Checkout_Email"]</label>
+                <input value="@Model.Email" disabled />
+                <small class="hint">@L["Account_EmailFixed"]</small>
+            </div>
+
+            <div class="crow">
+                <div class="cinput">
+                    <label asp-for="FirstName">@L["Checkout_FirstName"]</label>
+                    <input asp-for="FirstName" autocomplete="given-name" />
+                    <span asp-validation-for="FirstName"></span>
+                </div>
+                <div class="cinput">
+                    <label asp-for="LastName">@L["Checkout_LastName"]</label>
+                    <input asp-for="LastName" autocomplete="family-name" />
+                    <span asp-validation-for="LastName"></span>
+                </div>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="PhoneNumber">@L["Checkout_Phone"]</label>
+                <input asp-for="PhoneNumber" type="tel" autocomplete="tel" />
+                <span asp-validation-for="PhoneNumber"></span>
+            </div>
+
+            <label class="ccheck">
+                <input asp-for="AcceptsMarketing" />
+                <span>@L["Account_Marketing"]</span>
+            </label>
+
+            <button type="submit" class="btn-shop">@L["Account_Save"]</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

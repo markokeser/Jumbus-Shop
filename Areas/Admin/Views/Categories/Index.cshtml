@@ -1,0 +1,68 @@
+@model List<CategoryRow>
+@{
+    ViewData["Title"] = L["Admin_Categories"].Value;
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Categories"]</h1>
+    <a class="btn-shop" asp-area="Admin" asp-controller="Categories" asp-action="Create">@L["Admin_NewCategory"]</a>
+</header>
+
+<section class="adm-card adm-card-flush">
+    <table class="adm-table adm-table-cards">
+        <thead>
+            <tr>
+                <th>@L["Admin_Name"]</th>
+                <th>@L["Admin_Slug"]</th>
+                <th class="num">@L["Admin_Products"]</th>
+                <th>@L["Admin_Status"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                <tr class="@(row.IsActive ? null : "is-off") @(row.IsChild ? "adm-child" : "adm-parent")">
+                    <td data-label="@L["Admin_Name"]">
+                        <a class="adm-strong" asp-area="Admin" asp-controller="Categories" asp-action="Edit" asp-route-id="@row.Id">@row.Name</a>
+                        <small><code>@row.Code</code></small>
+                    </td>
+                    <td data-label="@L["Admin_Slug"]">
+                        <small><code>sr/@row.SlugSr</code><br /><code>en/@row.SlugEn</code></small>
+                    </td>
+                    <td class="num" data-label="@L["Admin_Products"]">
+                        @if (row.IsChild)
+                        {
+                            <a asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-categoryId="@row.Id">@row.Products</a>
+                        }
+                        else
+                        {
+                            <span class="adm-muted">&#8212;</span>
+                        }
+                    </td>
+                    <td data-label="@L["Admin_Status"]">
+                        <span class="adm-pill @(row.IsActive ? "pill-published" : "pill-archived")">@(row.IsActive ? L["Admin_Active"] : L["Admin_Inactive"])</span>
+                    </td>
+                    <td class="adm-row-actions">
+                        @if (!row.IsChild)
+                        {
+                            <a class="linkish" asp-area="Admin" asp-controller="Categories" asp-action="Create" asp-route-parentId="@row.Id">@L["Admin_NewSubcategory"]</a>
+                        }
+                        @if (row.CanDelete)
+                        {
+                            <form method="post" asp-area="Admin" asp-controller="Categories" asp-action="Delete" asp-route-id="@row.Id" data-confirm="@L["Admin_ConfirmDelete"]">
+                                <button type="submit" class="linkish quiet">@L["Admin_Delete"]</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<p class="adm-sub">@L["Admin_CategoriesHint"]</p>
+
+@section Scripts {
+    <partial name="_ConfirmScript" />
+}

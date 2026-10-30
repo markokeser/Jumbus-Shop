@@ -1,0 +1,35 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Diagnostics
+@{
+    var controller = ViewContext.RouteData.Values["controller"] as string;
+    var action = ViewContext.RouteData.Values["action"] as string;
+
+    // The cookie page has the same two buttons in its body.
+    var onPolicyPage = string.Equals(controller, "Legal", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(action, "Cookies", StringComparison.OrdinalIgnoreCase);
+
+    var routeCode = CultureConstants.ToRouteCode(CultureInfo.CurrentUICulture);
+
+    // On an error page the path is /status/404; come back to what was asked for.
+    var reExecuted = Context.Features.Get<IStatusCodeReExecuteFeature>();
+    var returnUrl = reExecuted is null
+        ? Context.Request.Path + Context.Request.QueryString
+        : reExecuted.OriginalPath + reExecuted.OriginalQueryString;
+}
+@if (CookieConsent.Read(Context) is null && !onPolicyPage)
+{
+    @* Both answers carry the same weight: refusing has to be as easy as accepting. *@
+    <section class="cookie-bar" aria-label="@L["Cookie_BannerLabel"]">
+        <div class="shell cookie-bar-in">
+            <p>
+                @L["Cookie_BannerText"]
+                <a asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Cookies">@L["Cookie_BannerMore"]</a>
+            </p>
+            <form method="post" class="cookie-bar-acts" asp-area="" asp-route-culture="@routeCode" asp-controller="Legal" asp-action="Consent">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button type="submit" name="choice" value="necessary" class="btn-shop btn-quiet">@L["Cookie_OnlyNecessary"]</button>
+                <button type="submit" name="choice" value="all" class="btn-shop btn-quiet">@L["Cookie_AcceptAll"]</button>
+            </form>
+        </div>
+    </section>
+}

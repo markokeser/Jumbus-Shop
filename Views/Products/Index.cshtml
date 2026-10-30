@@ -1,0 +1,105 @@
+@model WebShop.ViewModels.Catalog.ProductListViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ShopSettings> ShopOptions
+@{
+    var query = Model.Query;
+    var action = Model.Category is null ? "Index" : "Category";
+
+    var heading = Model.Category?.Name
+        ?? (query.HasSearch ? string.Format(L["Catalog_SearchHeading"].Value, query.Search) : L["Catalog_AllHeading"].Value);
+
+    ViewData["Title"] = Model.Category?.MetaTitle ?? heading;
+    ViewData["MetaDescription"] = Model.Category?.MetaDescription ?? Model.Category?.Description ?? L["Home_Intro"].Value;
+
+    if (Model.ShouldNoIndex)
+    {
+        ViewData["NoIndex"] = true;
+    }
+}
+
+@section Head {
+    @* The trail Home / Clothing / Dresses under the result title. *@
+    @if (Model.Category is { } category && !Model.ShouldNoIndex)
+    {
+        var origin = SiteUrls.Origin(Context, ShopOptions.Value);
+        var crumbs = new List<(string Name, string Url)> { (L["Crumbs_Home"].Value, origin + Url.Action("Index", "Home")) };
+
+        if (category.ParentSlug is { Length: > 0 } parentSlug)
+        {
+            crumbs.Add((category.ParentName ?? parentSlug, origin + Url.Action("Category", "Products", new { categorySlug = parentSlug })));
+        }
+
+        crumbs.Add((category.Name, origin + Context.Request.Path));
+
+        @StructuredData.Script(StructuredData.Breadcrumbs(crumbs))
+    }
+}
+
+<div class="lp">
+    <div class="shell">
+        <nav class="crumbs" aria-label="@L["Crumbs_Label"]">
+            <a asp-controller="Home" asp-action="Index">@L["Crumbs_Home"]</a>
+            @if (Model.Category is { ParentName: { } parentName } current)
+            {
+                <span class="crumb-sep">/</span>
+                @if (current.ParentSlug is { Length: > 0 } parentLink)
+                {
+                    <a asp-controller="Products" asp-action="Category" asp-route-categorySlug="@parentLink">@parentName</a>
+                }
+                else
+                {
+                    <span>@parentName</span>
+                }
+            }
+            <span class="crumb-sep">/</span>
+            <span>@heading</span>
+        </nav>
+
+        <header class="lp-head">
+            <div>
+                <h1>@heading</h1>
+                @if (Model.Category?.Description is { Length: > 0 } description)
+                {
+                    <p class="lp-lede">@description</p>
+                }
+            </div>
+            @if (Model.Category is not null)
+            {
+                @await Component.InvokeAsync("CategoryNav", new { variant = "pills", current = Model.Category.Slug })
+            }
+        </header>
+    </div>
+
+    <partial name="_FilterPanel" model="Model" />
+
+    <div class="shell">
+        @if (Model.HasResults)
+        {
+            <div class="grid-catalog">
+                @foreach (var product in Model.Products)
+                {
+                    <partial name="_ProductCard" model="product" />
+                }
+            </div>
+
+            <partial name="_Pagination" model="Model" />
+        }
+        else
+        {
+            <div class="empty">
+                <h2>@L["Catalog_EmptyHeading"]</h2>
+                <p>@L["Catalog_EmptyBody"]</p>
+                @if (query.HasAnyFilter)
+                {
+                    <a class="btn-shop btn-quiet"
+                       asp-controller="Products" asp-action="@action"
+                       asp-route-categorySlug="@Model.Category?.Slug">@L["Filter_Clear"]</a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/catalog.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,75 @@
+@model WebShop.ViewModels.Account.AddressFormViewModel
+@{
+    var heading = Model.Id > 0 ? L["Address_Edit"].Value : L["Address_Add"].Value;
+    ViewData["Title"] = heading;
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Addresses";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <a class="back" asp-controller="Addresses" asp-action="Index">&#8592; @L["Account_Addresses"]</a>
+        <h1>@heading</h1>
+
+        <form method="post" asp-controller="Addresses" asp-action="Save" class="acct-form">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="crow">
+                <div class="cinput">
+                    <label asp-for="FirstName">@L["Checkout_FirstName"]</label>
+                    <input asp-for="FirstName" autocomplete="given-name" />
+                    <span asp-validation-for="FirstName"></span>
+                </div>
+                <div class="cinput">
+                    <label asp-for="LastName">@L["Checkout_LastName"]</label>
+                    <input asp-for="LastName" autocomplete="family-name" />
+                    <span asp-validation-for="LastName"></span>
+                </div>
+            </div>
+
+            <div class="crow">
+                <div class="cinput wide">
+                    <label asp-for="Street">@L["Checkout_Street"]</label>
+                    <input asp-for="Street" autocomplete="address-line1" />
+                    <span asp-validation-for="Street"></span>
+                </div>
+                <div class="cinput narrow">
+                    <label asp-for="StreetNumber">@L["Checkout_StreetNumber"]</label>
+                    <input asp-for="StreetNumber" />
+                </div>
+            </div>
+
+            <div class="crow">
+                <div class="cinput">
+                    <label asp-for="City">@L["Checkout_City"]</label>
+                    <input asp-for="City" autocomplete="address-level2" />
+                    <span asp-validation-for="City"></span>
+                </div>
+                <div class="cinput narrow">
+                    <label asp-for="PostalCode">@L["Checkout_PostalCode"]</label>
+                    <input asp-for="PostalCode" autocomplete="postal-code" inputmode="numeric" />
+                    <span asp-validation-for="PostalCode"></span>
+                </div>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="PhoneNumber">@L["Checkout_Phone"]</label>
+                <input asp-for="PhoneNumber" type="tel" autocomplete="tel" />
+                <span asp-validation-for="PhoneNumber"></span>
+            </div>
+
+            <label class="ccheck">
+                <input asp-for="IsDefault" />
+                <span>@L["Address_UseAsDefault"]</span>
+            </label>
+
+            <button type="submit" class="btn-shop">@L["Account_Save"]</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,51 @@
+@model WebShop.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = L["Account_SignInTitle"].Value;
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell auth">
+    <h1>@L["Account_SignInTitle"]</h1>
+    <p class="auth-lede">@L["Account_SignInLede"]</p>
+
+    <form method="post" asp-controller="Account" asp-action="Login" class="auth-form">
+        <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="cinput">
+            <label asp-for="Email">@L["Checkout_Email"]</label>
+            <input asp-for="Email" type="email" autocomplete="username" autofocus />
+            <span asp-validation-for="Email"></span>
+        </div>
+
+        <div class="cinput">
+            <label asp-for="Password">@L["Account_PasswordLabel"]</label>
+            <input asp-for="Password" autocomplete="current-password" />
+            <span asp-validation-for="Password"></span>
+        </div>
+
+        <div class="auth-row">
+            <label class="ccheck">
+                <input asp-for="RememberMe" />
+                <span>@L["Account_RememberMe"]</span>
+            </label>
+            <a class="auth-link" asp-controller="Account" asp-action="ForgotPassword">@L["Account_ForgotLink"]</a>
+        </div>
+
+        <button type="submit" class="btn-shop auth-submit">@L["Nav_SignIn"]</button>
+    </form>
+
+    <p class="auth-alt">
+        @L["Account_NoAccount"]
+        <a asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">@L["Nav_Register"]</a>
+    </p>
+
+    <p class="auth-alt quiet">
+        @L["Account_GuestHint"]
+        <a asp-controller="Orders" asp-action="Track">@L["Footer_TrackOrder"]</a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

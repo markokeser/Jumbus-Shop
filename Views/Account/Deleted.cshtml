@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = L["Account_DeletedTitle"].Value;
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell status-page">
+    <h1>@L["Account_DeletedTitle"]</h1>
+    <p class="status-text">@L["Account_DeletedText"]</p>
+    <p class="status-links">
+        <a asp-controller="Home" asp-action="Index">@L["Status_Home"]</a>
+        <a asp-controller="Legal" asp-action="Privacy">@L["Footer_Privacy"]</a>
+    </p>
+</div>

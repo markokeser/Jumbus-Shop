@@ -1,0 +1,15 @@
+@model (WebShop.ViewModels.Navigation.CategoryNavGroup Group, string? Current)
+@using System.Globalization
+@{
+    var routeCode = CultureConstants.ToRouteCode(CultureInfo.CurrentUICulture);
+}
+
+<nav class="pills" aria-label="@Model.Group.Name">
+    <a class="@(Model.Current == Model.Group.Slug ? "on" : null)"
+       asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Category" asp-route-categorySlug="@Model.Group.Slug">@L["Catalog_AllInGroup"]</a>
+    @foreach (var child in Model.Group.Children)
+    {
+        <a class="@(Model.Current == child.Slug ? "on" : null)"
+           asp-area="" asp-route-culture="@routeCode" asp-controller="Products" asp-action="Category" asp-route-categorySlug="@child.Slug">@child.Name</a>
+    }
+</nav>

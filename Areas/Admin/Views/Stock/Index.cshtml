@@ -1,0 +1,67 @@
+@model AdminStockViewModel
+@{
+    ViewData["Title"] = L["Admin_Stock"].Value;
+    var here = Context.Request.Path + Context.Request.QueryString;
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Stock"]</h1>
+    <form class="adm-search" method="get" asp-area="Admin" asp-controller="Stock" asp-action="Index" role="search">
+        <input type="hidden" name="lowOnly" value="@(Model.Query.LowOnly ? "true" : "false")" />
+        <input type="search" name="q" value="@Model.Query.Q" placeholder="@L["Admin_ProductSearch"]" aria-label="@L["Admin_ProductSearch"]" />
+        <button type="submit" class="btn-shop btn-quiet">@L["Search_Submit"]</button>
+    </form>
+</header>
+
+<nav class="adm-tabs">
+    <a class="@(Model.Query.LowOnly ? "on" : null)" asp-area="Admin" asp-controller="Stock" asp-action="Index" asp-route-lowOnly="true" asp-route-q="@Model.Query.Q">@L["Admin_LowStock"]</a>
+    <a class="@(Model.Query.LowOnly ? null : "on")" asp-area="Admin" asp-controller="Stock" asp-action="Index" asp-route-lowOnly="false" asp-route-q="@Model.Query.Q">@L["Admin_AllVariants"]</a>
+</nav>
+
+<p class="hint adm-hint">@L["Admin_StockHint"]</p>
+
+<section class="adm-card adm-card-flush">
+    @if (Model.Rows.Count == 0)
+    {
+        <p class="adm-empty">@(Model.Query.LowOnly ? L["Admin_StockFine"] : L["Admin_NothingFound"])</p>
+    }
+    else
+    {
+        <table class="adm-table adm-table-cards">
+            <thead>
+                <tr>
+                    <th>@L["Admin_Product"]</th>
+                    <th>SKU</th>
+                    <th class="num">@L["Admin_ReorderAt"]</th>
+                    <th>@L["Admin_InStock"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Rows)
+                {
+                    <tr class="@(row.IsActive ? null : "is-off")">
+                        <td data-label="@L["Admin_Product"]">
+                            <a class="adm-strong" asp-area="Admin" asp-controller="Variants" asp-action="Edit" asp-route-id="@row.VariantId">@row.ProductName</a>
+                            <small>@row.Label @if (!row.IsActive) { <i class="adm-tag">@L["Admin_Inactive"]</i> }</small>
+                        </td>
+                        <td data-label="SKU"><code>@row.Sku</code></td>
+                        <td class="num" data-label="@L["Admin_ReorderAt"]">@row.Threshold</td>
+                        <td data-label="@L["Admin_InStock"]">
+                            <form method="post" class="adm-stockform" asp-area="Admin" asp-controller="Stock" asp-action="Set">
+                                <input type="hidden" name="variantId" value="@row.VariantId" />
+                                <input type="hidden" name="original" value="@row.Stock" />
+                                <input type="hidden" name="returnUrl" value="@here" />
+                                <input type="number" name="quantity" value="@row.Stock" inputmode="numeric"
+                                       class="adm-qty-input @(row.Stock == 0 ? "is-out" : row.IsLow ? "is-low" : null)"
+                                       aria-label="@L["Admin_InStock"]: @row.ProductName @row.Label" />
+                                <button type="submit" class="btn-shop btn-quiet">@L["Account_Save"]</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+<partial name="_AdminPager" model="Model.Page" />

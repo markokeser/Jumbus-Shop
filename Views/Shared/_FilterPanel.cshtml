@@ -1,0 +1,165 @@
+@model WebShop.ViewModels.Catalog.ProductListViewModel
+@using System.Globalization
+@{
+    var query = Model.Query;
+    var action = Model.Category is null ? "Index" : "Category";
+    var baseUrl = Url.Action(action, "Products", new { categorySlug = Model.Category?.Slug }) ?? "/";
+    var pairs = query.ToQueryPairs(includeSort: true);
+
+    // A link to this page with one filter value taken out.
+    string Without(string key, string? value = null) =>
+        baseUrl + QueryString.Create(pairs
+            .Where(p => !(p.Key == key && (value is null || p.Value == value)))
+            .Select(p => new KeyValuePair<string, string?>(p.Key, p.Value))).ToUriComponent();
+
+    var active = new List<(string Label, string Url)>();
+    foreach (var group in Model.Filters.Groups)
+    {
+        foreach (var option in group.Options.Where(o => o.IsSelected))
+        {
+            active.Add((option.Label, Without(group.Code, option.Code)));
+        }
+    }
+    foreach (var brand in Model.Filters.Brands.Where(b => b.IsSelected))
+    {
+        active.Add((brand.Label, Without("brand", brand.Code)));
+    }
+    if (query.MinPrice is { } min) { active.Add(($"{L["Filter_PriceFrom"]} {MoneyFormatter.Format(min, "RSD")}", Without("min"))); }
+    if (query.MaxPrice is { } max) { active.Add(($"{L["Filter_PriceTo"]} {MoneyFormatter.Format(max, "RSD")}", Without("max"))); }
+
+    var clearAll = baseUrl + (query.HasSearch ? QueryString.Create("q", query.Search!).ToUriComponent() : string.Empty);
+    var brandsOn = Model.Filters.Brands.Count(b => b.IsSelected);
+    var priceOn = query.MinPrice is not null || query.MaxPrice is not null;
+    const string Chevron = "<svg viewBox=\"0 0 12 12\" aria-hidden=\"true\"><path d=\"M2.5 4.5L6 8l3.5-3.5\" /></svg>";
+}
+
+@* One GET form, so the URL holds the whole state of the page and a filtered
+   view can be shared. Each dropdown is a <details>: it opens and closes with
+   no script. catalog.js only applies the toggles and sorting immediately. *@
+<form class="fb" method="get" asp-area="" asp-controller="Products" asp-action="@action" asp-route-categorySlug="@Model.Category?.Slug">
+    @if (query.HasSearch)
+    {
+        <input type="hidden" name="q" value="@query.Search" />
+    }
+
+    <div class="shell fb-in">
+        <div class="fb-groups">
+            @foreach (var group in Model.Filters.Groups)
+            {
+                var on = group.Options.Count(o => o.IsSelected);
+                <details class="fb-drop" name="fb">
+                    <summary class="fb-chip @(on > 0 ? "is-on" : null)">@group.Name@(on > 0 ? $" · {on}" : null) @Html.Raw(Chevron)</summary>
+                    <div class="fb-panel">
+                        @if (group.IsSwatchGroup)
+                        {
+                            <div class="fb-swatches">
+                                @foreach (var option in group.Options)
+                                {
+                                    <label class="fb-sw">
+                                        <input type="checkbox" name="@group.Code" value="@option.Code" checked="@option.IsSelected" />
+                                        <i style="background:@option.SwatchHex"></i>
+                                        <span>@option.Label</span>
+                                    </label>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="fb-opts">
+                                @foreach (var option in group.Options)
+                                {
+                                    <label class="fb-opt">
+                                        <input type="checkbox" name="@group.Code" value="@option.Code" checked="@option.IsSelected" />
+                                        <span>@option.Label</span>
+                                    </label>
+                                }
+                            </div>
+                        }
+                        <div class="fb-panel-foot"><button type="submit" class="btn-shop">@L["Filter_Apply"]</button></div>
+                    </div>
+                </details>
+            }
+
+            @if (Model.Filters.Brands.Count > 0)
+            {
+                <details class="fb-drop" name="fb">
+                    <summary class="fb-chip @(brandsOn > 0 ? "is-on" : null)">@L["Filter_Brand"]@(brandsOn > 0 ? $" · {brandsOn}" : null) @Html.Raw(Chevron)</summary>
+                    <div class="fb-panel">
+                        <div class="fb-opts">
+                            @foreach (var brand in Model.Filters.Brands)
+                            {
+                                <label class="fb-opt">
+                                    <input type="checkbox" name="brand" value="@brand.Code" checked="@brand.IsSelected" />
+                                    <span>@brand.Label</span>
+                                </label>
+                            }
+                        </div>
+                        <div class="fb-panel-foot"><button type="submit" class="btn-shop">@L["Filter_Apply"]</button></div>
+                    </div>
+                </details>
+            }
+
+            <details class="fb-drop" name="fb">
+                <summary class="fb-chip @(priceOn ? "is-on" : null)">@L["Filter_Price"] @Html.Raw(Chevron)</summary>
+                <div class="fb-panel">
+                    <div class="fb-price">
+                        <div>
+                            <label for="filter-min">@L["Filter_PriceFrom"]</label>
+                            <input id="filter-min" type="number" name="min" inputmode="numeric" min="0" step="10"
+                                   placeholder="@Model.Filters.LowestPrice.ToString("0", CultureInfo.InvariantCulture)"
+                                   value="@(query.MinPrice?.ToString("0", CultureInfo.InvariantCulture))" />
+                        </div>
+                        <span class="fb-dash">&#8211;</span>
+                        <div>
+                            <label for="filter-max">@L["Filter_PriceTo"]</label>
+                            <input id="filter-max" type="number" name="max" inputmode="numeric" min="0" step="10"
+                                   placeholder="@Model.Filters.HighestPrice.ToString("0", CultureInfo.InvariantCulture)"
+                                   value="@(query.MaxPrice?.ToString("0", CultureInfo.InvariantCulture))" />
+                        </div>
+                    </div>
+                    <div class="fb-panel-foot"><button type="submit" class="btn-shop">@L["Filter_Apply"]</button></div>
+                </div>
+            </details>
+
+            <label class="fb-toggle">
+                <input type="checkbox" name="stock" value="true" checked="@query.InStockOnly" data-instant />
+                <span>@L["Filter_InStockOnly"]</span>
+            </label>
+            <label class="fb-toggle">
+                <input type="checkbox" name="sale" value="true" checked="@query.OnSaleOnly" data-instant />
+                <span>@L["Filter_OnSaleOnly"]</span>
+            </label>
+        </div>
+
+        <div class="fb-end">
+            <span class="fb-count">@string.Format(L["Catalog_ResultCount"].Value, Model.TotalCount)</span>
+            <label class="visually-hidden" for="sort">@L["Sort_Label"]</label>
+            <select id="sort" name="sort" class="fb-sort" data-instant>
+                <option value="Newest" selected="@(query.Sort == WebShop.Services.Catalog.ProductSort.Newest)">@L["Sort_Newest"]</option>
+                <option value="PriceLowToHigh" selected="@(query.Sort == WebShop.Services.Catalog.ProductSort.PriceLowToHigh)">@L["Sort_PriceAsc"]</option>
+                <option value="PriceHighToLow" selected="@(query.Sort == WebShop.Services.Catalog.ProductSort.PriceHighToLow)">@L["Sort_PriceDesc"]</option>
+                <option value="NameAscending" selected="@(query.Sort == WebShop.Services.Catalog.ProductSort.NameAscending)">@L["Sort_Name"]</option>
+            </select>
+            <noscript><button type="submit" class="btn-shop btn-quiet">@L["Sort_Apply"]</button></noscript>
+        </div>
+    </div>
+</form>
+
+@if (active.Count > 0 || query.InStockOnly || query.OnSaleOnly)
+{
+    <div class="shell fb-active">
+        @foreach (var chip in active)
+        {
+            <a class="fb-x" href="@chip.Url" aria-label="@string.Format(L["Filter_RemoveOne"].Value, chip.Label)">@chip.Label</a>
+        }
+        @if (query.InStockOnly)
+        {
+            <a class="fb-x" href="@Without("stock")">@L["Filter_InStockOnly"]</a>
+        }
+        @if (query.OnSaleOnly)
+        {
+            <a class="fb-x" href="@Without("sale")">@L["Filter_OnSaleOnly"]</a>
+        }
+        <a class="fb-clear" href="@clearAll">@L["Filter_Clear"]</a>
+    </div>
+}

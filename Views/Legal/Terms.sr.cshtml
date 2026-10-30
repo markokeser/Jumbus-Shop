@@ -1,0 +1,69 @@
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Uslovi korišćenja i prodaje";
+    ViewData["MetaDescription"] = $"Kako se kupuje u prodavnici {shop.Name}: porudžbina, cene, plaćanje, isporuka, odustanak i reklamacije.";
+}
+@* Nacrt usklađen sa Zakonom o zaštiti potrošača (Sl. glasnik RS 88/2021).
+   Pre puštanja u rad treba da ga pregleda pravnik. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">Važe od 30. oktobra 2026.</p>
+
+        <h2>1. Prodavac</h2>
+        <p>Prodavnicu @shop.Name vodi:</p>
+        <partial name="_Company" />
+
+        <h2>2. Na šta se uslovi odnose</h2>
+        <p>Ovi uslovi važe za korišćenje sajta i za svaku kupovinu na njemu. Slanjem porudžbine potvrđujete da ste ih pročitali i da ih prihvatate. Ako kupujete kao potrošač, imate sva prava koja vam daje Zakon o zaštiti potrošača; ništa u ovim uslovima ih ne umanjuje.</p>
+
+        <h2>3. Porudžbina i zaključenje ugovora</h2>
+        <ol>
+            <li>Izaberete proizvod, veličinu ili nijansu i dodate ga u korpu.</li>
+            <li>Na stranici za plaćanje unesete podatke za isporuku, izaberete kurirsku službu i način plaćanja.</li>
+            <li>Pre slanja vidite pregled porudžbine: proizvode, cenu svakog, troškove dostave, popust i ukupan iznos sa PDV-om. Tu još možete da ispravite greške.</li>
+            <li>Klikom na dugme za potvrdu šaljete porudžbinu koja obavezuje na plaćanje. Odmah zatim dobijate broj porudžbine i mejl o prijemu.</li>
+            <li>Ugovor je zaključen kada porudžbinu potvrdimo, o čemu vam šaljemo mejl.</li>
+        </ol>
+        <p>Ako proizvod u međuvremenu ostane bez zaliha, javićemo vam se pre slanja. Tada možete da sačekate, izaberete drugi proizvod ili otkažete porudžbinu; ako ste već platili, novac vraćamo bez odlaganja.</p>
+
+        <h2>4. Cene</h2>
+        <p>Cene su u dinarima i uključuju PDV. Troškovi dostave prikazani su u korpi i na stranici za plaćanje, pre nego što pošaljete porudžbinu. Važi cena prikazana u trenutku slanja porudžbine. Akcijska cena važi u periodu koji je naveden uz proizvod.</p>
+
+        <h2>5. Plaćanje</h2>
+        <ul>
+            <li><strong>Pouzećem</strong> — plaćate gotovinom kuriru pri preuzimanju paketa.</li>
+            <li><strong>Platnom karticom</strong>, kada je ponuđeno na stranici za plaćanje — plaćanje obavlja ovlašćeni procesor plaćanja; podaci o kartici ne prolaze kroz naš sistem i ne čuvamo ih.</li>
+        </ul>
+
+        <h2>6. Isporuka</h2>
+        <p>Rokovi, cena dostave i kurirske službe opisani su na stranici <a asp-action="Shipping">Dostava i plaćanje</a>. Rizik od oštećenja ili gubitka robe prelazi na vas kada paket preuzmete vi ili lice koje ste odredili.</p>
+
+        <h2>7. Odustanak od ugovora</h2>
+        <p>Imate pravo da odustanete od kupovine u roku od 14 dana od dana prijema robe, bez navođenja razloga. Postupak, izuzeci i obrazac su na stranici <a asp-action="Returns">Reklamacije i povraćaj</a>.</p>
+
+        <h2>8. Saobraznost i reklamacije</h2>
+        <p>Odgovaramo za saobraznost robe ugovoru u skladu sa zakonom, u roku od dve godine od prijema. Kako se podnosi reklamacija i u kojim rokovima odgovaramo, piše na stranici <a asp-action="Returns">Reklamacije i povraćaj</a>.</p>
+
+        <h2>9. Korisnički nalog</h2>
+        <p>Za kupovinu nalog nije potreban. Ako ga otvorite, odgovorni ste za tačnost podataka i za čuvanje lozinke. Nalog možete da obrišete u svakom trenutku, u delu <em>Moji podaci</em>; porudžbine ostaju sačuvane onoliko koliko to nalažu propisi, kako je opisano u <a asp-action="Privacy">Politici privatnosti</a>.</p>
+
+        <h2>10. Recenzije</h2>
+        <p>Recenziju može da ostavi prijavljen kupac. Pre objavljivanja je pregledamo. Ne objavljujemo recenzije koje su uvredljive, sadrže tuđe lične podatke ili reklamu, ili očigledno ne govore o proizvodu. Recenzije se ne plaćaju i ne uklanjamo ih zato što su nepovoljne.</p>
+
+        <h2>11. Sadržaj sajta</h2>
+        <p>Fotografije, tekstovi i dizajn sajta pripadaju prodavcu ili njegovim partnerima i ne smeju da se koriste bez dozvole. Trudimo se da opisi, mere i boje budu tačni; boja na ekranu može malo da odstupa od stvarne.</p>
+
+        <h2>12. Vansudsko rešavanje sporova</h2>
+        <p>Ako nismo rešili vašu reklamaciju ili prigovor onako kako ste očekivali, možete da pokrenete postupak vansudskog rešavanja potrošačkog spora pred jednim od tela sa liste koju vodi ministarstvo nadležno za zaštitu potrošača. Pre toga je potrebno da ste nam reklamaciju ili prigovor podneli. Učešće u tom postupku je za nas obavezno, a za vas besplatno. Više o tome je na stranici <a asp-action="Returns" asp-fragment="vansudsko">Reklamacije i povraćaj</a>.</p>
+
+        <h2>13. Merodavno pravo</h2>
+        <p>Na ove uslove i na ugovore zaključene preko sajta primenjuje se pravo Republike Srbije. Za sporove je nadležan sud određen zakonom.</p>
+
+        <h2>14. Izmene uslova</h2>
+        <p>Uslove možemo da menjamo; nova verzija važi od dana objavljivanja na ovoj stranici. Za vašu porudžbinu važe uslovi koji su bili objavljeni kada ste je poslali.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

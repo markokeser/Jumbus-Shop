@@ -1,0 +1,37 @@
+@model AdminNavCounts
+@{
+    var controller = ViewContext.RouteData.Values["controller"] as string ?? string.Empty;
+    string? On(params string[] names) => names.Contains(controller, StringComparer.OrdinalIgnoreCase) ? "on" : null;
+}
+
+<nav class="adm-nav" aria-label="@L["Nav_Admin"]">
+    <a class="@On("Dashboard")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">@L["Admin_Overview"]</a>
+    <a class="@On("Orders")" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+        @L["Admin_Orders"]
+        @if (Model.NewOrders > 0)
+        {
+            <b class="adm-badge" title="@L["OrderStatus_New"]">@Model.NewOrders</b>
+        }
+    </a>
+    <a class="@On("Products", "Variants")" asp-area="Admin" asp-controller="Products" asp-action="Index">@L["Admin_Products"]</a>
+    <a class="@On("Stock")" asp-area="Admin" asp-controller="Stock" asp-action="Index">
+        @L["Admin_Stock"]
+        @if (Model.LowStock > 0)
+        {
+            <b class="adm-badge" title="@L["Admin_LowStock"]">@Model.LowStock</b>
+        }
+    </a>
+    <a class="@On("Coupons")" asp-area="Admin" asp-controller="Coupons" asp-action="Index">@L["Admin_Coupons"]</a>
+    <a class="@On("Reviews")" asp-area="Admin" asp-controller="Reviews" asp-action="Index">
+        @L["Reviews_Title"]
+        @if (Model.PendingReviews > 0)
+        {
+            <b class="adm-badge" title="@L["Admin_ReviewsTitle"]">@Model.PendingReviews</b>
+        }
+    </a>
+
+    <span class="adm-nav-head">@L["Admin_Setup"]</span>
+    <a class="@On("Categories")" asp-area="Admin" asp-controller="Categories" asp-action="Index">@L["Admin_Categories"]</a>
+    <a class="@On("Brands")" asp-area="Admin" asp-controller="Brands" asp-action="Index">@L["Admin_Brands"]</a>
+    <a class="@On("Attributes")" asp-area="Admin" asp-controller="Attributes" asp-action="Index">@L["Admin_Attributes"]</a>
+</nav>

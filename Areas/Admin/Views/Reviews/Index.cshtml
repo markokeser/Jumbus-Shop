@@ -1,0 +1,49 @@
+@model List<WebShop.ViewModels.Reviews.PendingReviewViewModel>
+@{
+    ViewData["Title"] = L["Admin_ReviewsTitle"].Value;
+}
+
+<header class="adm-head">
+    <div>
+        <h1>@L["Admin_ReviewsTitle"]</h1>
+        <p class="adm-sub">@string.Format(L["Admin_ReviewsPending"].Value, Model.Count)</p>
+    </div>
+</header>
+
+@if (Model.Count == 0)
+{
+    <section class="adm-card"><p class="adm-empty">@L["Admin_ReviewsNone"]</p></section>
+}
+
+<div class="modq">
+    @foreach (var review in Model)
+    {
+        <article class="modq-item">
+            <header>
+                <b>@review.ProductName</b>
+                <span class="rating-num">@review.Rating / 5</span>
+                @if (review.IsVerifiedPurchase)
+                {
+                    <span class="verified">@L["Reviews_Verified"]</span>
+                }
+            </header>
+
+            @if (!string.IsNullOrEmpty(review.Title))
+            {
+                <h3>@review.Title</h3>
+            }
+            <p>@review.Body</p>
+
+            <footer>
+                <span class="brand">@review.AuthorEmail &#8212; @ShopTime.DateAndTime(review.CreatedUtc)</span>
+
+                <form method="post" asp-area="Admin" asp-controller="Reviews" asp-action="Approve" asp-route-id="@review.Id">
+                    <button type="submit" class="btn-shop">@L["Admin_Approve"]</button>
+                </form>
+                <form method="post" asp-area="Admin" asp-controller="Reviews" asp-action="Reject" asp-route-id="@review.Id">
+                    <button type="submit" class="btn-shop btn-quiet">@L["Admin_Reject"]</button>
+                </form>
+            </footer>
+        </article>
+    }
+</div>

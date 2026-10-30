@@ -1,0 +1,58 @@
+@{
+    var company = ShopOptions.Value.Company;
+    ViewData["Title"] = "Obrazac za odustanak od ugovora";
+    ViewData["MetaDescription"] = "Obrazac izjave o odustanku od ugovora zaključenog na daljinu, sa podacima prodavca, spreman za štampu.";
+}
+@* Oblik i sadržina propisani Pravilnikom o obliku i sadržini obrasca za
+   odustanak od ugovora zaključenog na daljinu ili izvan poslovnih prostorija
+   (Sl. glasnik RS 21/2022). Polja i redosled ne menjati. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1 class="no-print">@ViewData["Title"]</h1>
+        <p class="no-print">Popunite i pošaljite ovaj obrazac samo ako želite da odustanete od kupovine. Možete da ga odštampate i pošaljete poštom, ili da ga popunite i pošaljete imejlom na <a href="mailto:@company.Email">@company.Email</a>. Umesto obrasca možete da pošaljete i bilo koju drugu jasnu izjavu. Uslovi su opisani na stranici <a asp-action="Returns">Reklamacije i povraćaj</a>.</p>
+        <p class="no-print"><button type="button" class="btn-shop btn-quiet" data-print>Odštampaj ili sačuvaj kao PDF</button></p>
+
+        <section class="wform" aria-labelledby="wform-title">
+            <p class="wform-kind">Obrazac</p>
+            <h2 id="wform-title">Izjava o odustanku od ugovora zaključenog na daljinu ili izvan poslovnih prostorija</h2>
+
+            <h3>Popunjava trgovac</h3>
+            <dl class="wform-filled">
+                <dt>Naziv:</dt><dd>@company.LegalName</dd>
+                <dt>Adresa:</dt><dd>@company.Address</dd>
+                <dt>Broj telefona/faksa:</dt><dd>@company.Phone</dd>
+                <dt>Elektronska pošta:</dt><dd>@company.Email</dd>
+            </dl>
+
+            <h3>Popunjava potrošač</h3>
+            <p>Ovim obaveštavam da odustajem od ugovora o prodaji sledeće robe/usluge (*):</p>
+            <div class="wform-line tall"></div>
+
+            <div class="wform-pair">
+                <div><span>Datum zaključenja ugovora</span><div class="wform-line"></div></div>
+                <div><span>Datum prijema robe</span><div class="wform-line"></div></div>
+            </div>
+
+            <p>Razlozi za odustanak (nije obavezno popunjavati):</p>
+            <div class="wform-line tall"></div>
+
+            <p>Ime i prezime potrošača:</p>
+            <div class="wform-line"></div>
+
+            <p>Adresa potrošača:</p>
+            <div class="wform-line"></div>
+
+            <div class="wform-pair">
+                <div><span>Potpis potrošača (ukoliko se dostavlja poštom ili faksom):</span><div class="wform-line"></div></div>
+                <div><span>Datum (popunjavanja obrasca):</span><div class="wform-line"></div></div>
+            </div>
+
+            <p class="wform-note">(*) Precrtati nepotrebno.</p>
+        </section>
+
+        <p class="no-print legal-muted">Pomoć: uz robu upišite i broj porudžbine, a ako ste platili pouzećem, i broj tekućeg računa za povraćaj novca.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

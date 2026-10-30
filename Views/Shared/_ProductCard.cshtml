@@ -1,0 +1,79 @@
+@model WebShop.ViewModels.Catalog.ProductCardViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ShopSettings> ShopOptions
+@{
+    var currency = ShopOptions.Value.Currency;
+
+    // Until there are photos the tile is the product's own colour (or shade),
+    // labelled like a colour sample. A photo covers it; if the photo cannot be
+    // loaded, onerror removes it and the sample shows again.
+    var tint = Model.Swatches.FirstOrDefault()?.Hex;
+    var sample = Model.Swatches.FirstOrDefault()?.Label;
+    var dots = Model.Swatches.Take(5).ToList();
+    var moreDots = Math.Max(0, Model.SwatchCount - dots.Count);
+}
+
+<a class="pc" asp-area="" asp-controller="Products" asp-action="Details"
+   asp-route-categorySlug="@Model.CategorySlug" asp-route-productSlug="@Model.Slug">
+    <div class="pc-tile @(tint is null ? "pc-tile-plain" : null)" style="@(tint is null ? null : "--tint:" + tint)">
+        @if (tint is null && Model.TextChips.Count > 0)
+        {
+            <span class="pc-type">@string.Join(" · ", Model.TextChips)</span>
+        }
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <img src="~/@Model.ImagePath" alt="@Model.ImageAlt" loading="lazy" onerror="this.remove()" />
+        }
+        <div class="pc-label">
+            <span>@(sample ?? Model.Note)</span>
+            <span>@Model.SizeRun</span>
+        </div>
+
+        @if (Model.IsOnSale)
+        {
+            <span class="pc-badge pc-sale">&#8722;@Model.DiscountPercent%</span>
+        }
+        else if (Model.IsNew)
+        {
+            <span class="pc-badge">@L["Card_New"]</span>
+        }
+
+        @if (!Model.IsInStock)
+        {
+            <span class="pc-badge pc-low pc-out">@L["Common_OutOfStock"]</span>
+        }
+        else if (Model.StockLeft is > 0 and <= 3)
+        {
+            <span class="pc-badge pc-low">@string.Format(L["Card_FewLeft"].Value, Model.StockLeft)</span>
+        }
+    </div>
+
+    <div class="pc-meta">
+        <span class="pc-brand">@Model.BrandName</span>
+        <h3 class="pc-name">@Model.Name</h3>
+        <div class="pc-price">
+            @if (Model.IsOnSale)
+            {
+                <span class="pc-now">@MoneyFormatter.Format(Model.EffectivePrice, currency)</span>
+                <s>@MoneyFormatter.Format(Model.Price, currency)</s>
+            }
+            else
+            {
+                <span>@MoneyFormatter.Format(Model.Price, currency)</span>
+            }
+        </div>
+        @if (dots.Count > 1)
+        {
+            <div class="pc-dots" aria-label="@string.Format(L["Card_ColourCount"].Value, Model.SwatchCount)">
+                @foreach (var swatch in dots)
+                {
+                    <i style="background:@swatch.Hex" title="@swatch.Label"></i>
+                }
+                @if (moreDots > 0)
+                {
+                    <span>+@moreDots</span>
+                }
+            </div>
+        }
+    </div>
+</a>

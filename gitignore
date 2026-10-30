@@ -1,0 +1,30 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.rsuser
+*.userprefs
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+TestResults/
+*.nupkg
+publish/
+
+# Other editors and the OS
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Local settings with secrets, if you ever use them instead of User Secrets
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Photos uploaded from the admin are data, not code: back them up separately.
+# The sample images used by sql/04-sample-images.sql stay in the repository.
+**/wwwroot/media/products/*
+!**/wwwroot/media/products/sample/

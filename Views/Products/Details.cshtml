@@ -1,0 +1,317 @@
+@model WebShop.ViewModels.Catalog.ProductDetailsViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ShopSettings> ShopOptions
+@{
+    var shop = ShopOptions.Value;
+    var opening = Model.DefaultVariant;
+
+    ViewData["Title"] = Model.MetaTitle ?? Model.Name;
+    ViewData["MetaDescription"] = Model.MetaDescription ?? Model.ShortDescription;
+    ViewData["OgType"] = "product";
+    ViewData["OgImage"] = Model.Images.FirstOrDefault(i => i.Path.Length > 0)?.Path;
+
+    var origin = SiteUrls.Origin(Context, shop);
+    var pageUrl = origin + Context.Request.Path;
+
+    var crumbs = new List<(string Name, string Url)>
+    {
+        (L["Crumbs_Home"].Value, origin + Url.Action("Index", "Home"))
+    };
+    if (Model.ParentCategorySlug is { Length: > 0 } parentCrumb)
+    {
+        crumbs.Add((Model.ParentCategoryName ?? parentCrumb, origin + Url.Action("Category", "Products", new { categorySlug = parentCrumb })));
+    }
+    crumbs.Add((Model.CategoryName, origin + Url.Action("Category", "Products", new { categorySlug = Model.CategorySlug })));
+    crumbs.Add((Model.Name, pageUrl));
+}
+
+@section Head {
+    @* Price, stock and rating for search results, and the breadcrumb trail
+       shown under the result title. *@
+    @StructuredData.Script(
+        StructuredData.Product(
+            Model,
+            pageUrl,
+            Model.Images.Where(i => i.Path.Length > 0).Select(i => origin + "/" + i.Path),
+            shop.Currency),
+        StructuredData.Breadcrumbs(crumbs))
+}
+
+<div class="shell">
+    <nav class="crumbs" aria-label="@L["Crumbs_Label"]">
+        <a asp-controller="Home" asp-action="Index">@L["Crumbs_Home"]</a>
+
+        @if (Model.ParentCategorySlug is { Length: > 0 } parentSlug)
+        {
+            <span class="crumb-sep">/</span>
+            <a asp-controller="Products" asp-action="Category"
+               asp-route-categorySlug="@parentSlug">@Model.ParentCategoryName</a>
+        }
+
+        <span class="crumb-sep">/</span>
+        <a asp-controller="Products" asp-action="Category"
+           asp-route-categorySlug="@Model.CategorySlug">@Model.CategoryName</a>
+    </nav>
+</div>
+
+<article class="pdp shell"
+         data-variants="@Model.VariantsJson"
+         data-currency="@shop.Currency"
+         data-label-instock="@L["Common_InStock"]"
+         data-label-outofstock="@L["Common_OutOfStock"]"
+         data-label-lowstock="@L["Pdp_LowStock"]"
+         data-label-unavailable="@L["Pdp_Unavailable"]">
+
+    <div class="pdp-media">
+        @if (Model.Images.Count > 0 && Model.Images[0].Path is { Length: > 0 })
+        {
+            <figure class="pdp-shot">
+                <img src="~/@Model.Images[0].Path" alt="@(Model.Images[0].Alt ?? Model.Name)" />
+            </figure>
+        }
+        else
+        {
+            @* No photography yet. Rather than an empty frame, show the full
+               set of colours or shades at a size worth looking at. *@
+            <figure class="pdp-shot pdp-specimen">
+                @{
+                    var swatchGroup = Model.PickerGroups.FirstOrDefault(g => g.IsSwatchGroup);
+                }
+
+                @if (swatchGroup is not null)
+                {
+                    <div class="pdp-swatches">
+                        @foreach (var option in swatchGroup.Options)
+                        {
+                            <div>
+                                <i style="background:@option.SwatchHex" title="@option.Label"></i>
+                                <span>@option.Label</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="pdp-nophoto">@Model.BrandName</div>
+                }
+
+                <figcaption>@L["Pdp_NoPhotoYet"]</figcaption>
+            </figure>
+        }
+    </div>
+
+    <div class="pdp-buy">
+        <p class="brand">@Model.BrandName</p>
+        <h1>@Model.Name</h1>
+
+        @if (Model.ShortDescription is { Length: > 0 })
+        {
+            <p class="pdp-lede">@Model.ShortDescription</p>
+        }
+
+        <div class="pdp-price">
+            <span class="now" data-price>
+                @MoneyFormatter.Format(opening?.EffectivePrice ?? Model.LowestPrice, shop.Currency)
+            </span>
+
+            <span class="was" data-was hidden="@(opening is null || !opening.IsOnSale)">
+                @(opening is { IsOnSale: true } ? opening.Price.ToString("N0") : string.Empty)
+            </span>
+
+            <span class="pdp-sku" data-sku>@(opening?.Sku ?? Model.Sku)</span>
+        </div>
+
+        <p class="pdp-stock @(Model.IsInStock ? "in" : "out")" data-stock>
+            @(Model.IsInStock ? L["Common_InStock"] : L["Common_OutOfStock"])
+        </p>
+
+        @foreach (var group in Model.PickerGroups)
+        {
+            <div class="picker" data-picker="@group.Code">
+                <div class="picker-head">
+                    <span class="picker-name">@group.Name</span>
+                    <span class="picker-chosen" data-chosen></span>
+                </div>
+
+                <div class="picker-options @(group.IsSwatchGroup ? "swatched" : null)">
+                    @foreach (var option in group.Options)
+                    {
+                        var isDefault = opening?.Values
+                            .Any(v => v.AttributeCode == group.Code && v.PickerValue == option.Value) == true;
+
+                        <button type="button"
+                                class="popt @(isDefault ? "on" : null)"
+                                data-value="@option.Value"
+                                data-label="@option.Label"
+                                aria-pressed="@(isDefault ? "true" : "false")"
+                                title="@option.Label">
+                            @if (option.SwatchHex is { Length: > 0 })
+                            {
+                                <i style="background:@option.SwatchHex"></i>
+                                <span class="visually-hidden">@option.Label</span>
+                            }
+                            else
+                            {
+                                <span>@option.Label</span>
+                            }
+                        </button>
+                    }
+                </div>
+
+                @if (group.Code == "size")
+                {
+                    <details class="size-help">
+                        <summary>@L["Size_ChartLink"]</summary>
+                        <partial name="_SizeChart" />
+                    </details>
+                }
+            </div>
+        }
+
+        @* The hidden variant id is kept in step with the picker by
+           variant-picker.js. Without scripting the field still holds the
+           opening variant, so the form posts something real. *@
+        <form method="post" asp-controller="Cart" asp-action="Add" class="pdp-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="variantId" value="@(opening?.Id ?? 0)" data-variant-id />
+            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+            <label class="visually-hidden" for="qty">@L["Cart_Quantity"]</label>
+            <input id="qty" class="qty" type="number" name="quantity" value="1" min="1" max="20" />
+
+            <button type="submit" class="btn-shop pdp-add" data-add
+                    disabled="@(!Model.IsInStock)">
+                @L["Pdp_AddToCart"]
+            </button>
+        </form>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form method="post" asp-controller="Wishlist" asp-action="Toggle" class="pdp-save">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="linkish" aria-pressed="@(Model.IsInWishlist ? "true" : "false")">
+                    @(Model.IsInWishlist ? L["Wishlist_Saved"] : L["Wishlist_Save"])
+                </button>
+            </form>
+        }
+        else
+        {
+            <p class="pdp-save">
+                <a class="linkish" asp-controller="Account" asp-action="Login"
+                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">@L["Wishlist_Save"]</a>
+            </p>
+        }
+
+        @if (Model.Reviews.Count > 0)
+        {
+            <a class="pdp-rating" href="#reviews">
+                <b>@Model.Reviews.Average.ToString("0.0")</b> / 5
+                <span>@string.Format(L["Reviews_Count"].Value, Model.Reviews.Count)</span>
+            </a>
+        }
+
+        @if (Model.SharedFacts.Count > 0)
+        {
+            <dl class="pdp-facts">
+                @foreach (var fact in Model.SharedFacts)
+                {
+                    <div>
+                        <dt>@fact.AttributeName</dt>
+                        <dd>@fact.DisplayValue</dd>
+                    </div>
+                }
+            </dl>
+        }
+    </div>
+
+    <div class="pdp-detail">
+        @if (Model.Description is { Length: > 0 })
+        {
+            <section>
+                <h2>@L["Pdp_Description"]</h2>
+                <p>@Model.Description</p>
+            </section>
+        }
+
+        @if (Model.Ingredients is { Length: > 0 })
+        {
+            <section>
+                <h2>@L["Pdp_Ingredients"]</h2>
+                <p class="pdp-ingredients">@Model.Ingredients</p>
+            </section>
+        }
+
+        @if (Model.CareInstructions is { Length: > 0 })
+        {
+            <section>
+                <h2>@L["Pdp_Care"]</h2>
+                <p>@Model.CareInstructions</p>
+            </section>
+        }
+
+        <section>
+            <h2>@L["Pdp_Availability"]</h2>
+            <table class="vtable">
+                <thead>
+                    <tr>
+                        <th scope="col">@L["Pdp_Variant"]</th>
+                        <th scope="col">@L["Pdp_Sku"]</th>
+                        <th scope="col" class="num">@L["Pdp_Price"]</th>
+                        <th scope="col" class="num">@L["Pdp_Stock"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var variant in Model.Variants)
+                    {
+                        var describes = string.Join(" / ", variant.Values
+                            .Where(v => v.IsVariantDefining)
+                            .OrderBy(v => v.DisplayOrder)
+                            .Select(v => v.DisplayValue));
+
+                        <tr>
+                            <td>@(string.IsNullOrEmpty(describes) ? Model.Name : describes)</td>
+                            <td class="mono">@variant.Sku</td>
+                            <td class="num">
+                                @MoneyFormatter.Format(variant.EffectivePrice, shop.Currency)
+                                @if (variant.IsOnSale)
+                                {
+                                    <span class="was">@variant.Price.ToString("N0")</span>
+                                }
+                            </td>
+                            <td class="num @(variant.StockQuantity > 0 ? null : "out")">
+                                @(variant.StockQuantity > 0 ? variant.StockQuantity.ToString() : L["Common_OutOfStock"].Value)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+
+        <partial name="_Reviews" model="Model" />
+    </div>
+</article>
+
+@if (Model.Related.Count > 0)
+{
+    <section class="sec">
+        <div class="shell">
+            <div class="sec-hd">
+                <h2>@L["Pdp_Related"]</h2>
+                <a asp-controller="Products" asp-action="Category"
+                   asp-route-categorySlug="@Model.CategorySlug">@Model.CategoryName</a>
+            </div>
+
+            <div class="grid">
+                @foreach (var related in Model.Related)
+                {
+                    <partial name="_ProductCard" model="related" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script src="~/js/variant-picker.js" asp-append-version="true"></script>
+}

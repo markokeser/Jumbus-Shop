@@ -1,0 +1,142 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = L["Admin_Overview"].Value;
+    var currency = Shop.Value.Currency;
+    var max = Model.DailyMax;
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Overview"]</h1>
+    <p class="adm-sub">@string.Format(L["Admin_Last30"].Value, 30)</p>
+</header>
+
+<section class="adm-kpis">
+    <div class="adm-kpi">
+        <span>@L["Admin_Revenue"]</span>
+        <b>@MoneyFormatter.Format(Model.Revenue30, currency)</b>
+    </div>
+    <div class="adm-kpi">
+        <span>@L["Admin_Orders"]</span>
+        <b>@Model.Orders30</b>
+    </div>
+    <div class="adm-kpi">
+        <span>@L["Admin_AverageOrder"]</span>
+        <b>@MoneyFormatter.Format(Model.AverageOrder30, currency)</b>
+    </div>
+    <div class="adm-kpi">
+        <span>@L["Admin_Today"]</span>
+        <b>@Model.OrdersToday</b>
+    </div>
+</section>
+
+@* What needs a person, in the order it needs them. *@
+<section class="adm-todo">
+    <a class="adm-todo-item @(Model.NewOrders > 0 ? "is-due" : null)"
+       asp-area="Admin" asp-controller="Orders" asp-action="Index" asp-route-status="@OrderStatus.New">
+        <b>@Model.NewOrders</b><span>@L["Admin_TodoConfirm"]</span>
+    </a>
+    <a class="adm-todo-item @(Model.ToShip > 0 ? "is-due" : null)"
+       asp-area="Admin" asp-controller="Orders" asp-action="Index" asp-route-status="@OrderStatus.Confirmed">
+        <b>@Model.ToShip</b><span>@L["Admin_TodoShip"]</span>
+    </a>
+    <a class="adm-todo-item @(Model.LowStockCount > 0 ? "is-due" : null)"
+       asp-area="Admin" asp-controller="Stock" asp-action="Index">
+        <b>@Model.LowStockCount</b><span>@L["Admin_LowStock"]</span>
+    </a>
+    <a class="adm-todo-item @(Model.PendingReviews > 0 ? "is-due" : null)"
+       asp-area="Admin" asp-controller="Reviews" asp-action="Index">
+        <b>@Model.PendingReviews</b><span>@L["Admin_ReviewsTitle"]</span>
+    </a>
+</section>
+
+<section class="adm-card">
+    <div class="adm-card-hd">
+        <h2>@L["Admin_RevenueByDay"]</h2>
+    </div>
+
+    @if (max <= 0)
+    {
+        <p class="adm-empty">@L["Admin_NoOrdersYet"]</p>
+    }
+    else
+    {
+        <div class="adm-bars" role="img" aria-label="@L["Admin_RevenueByDay"]">
+            @foreach (var day in Model.Daily)
+            {
+                var height = (int)Math.Round(day.Revenue / max * 100);
+                <span class="@(day.Revenue == 0 ? "zero" : null)" style="--h:@(height)%"
+                      title="@day.Day.ToString("d", CultureInfo.CurrentCulture) · @MoneyFormatter.Format(day.Revenue, currency) · @day.Orders"></span>
+            }
+        </div>
+        <div class="adm-bars-axis">
+            <span>@Model.Daily[0].Day.ToString("d", CultureInfo.CurrentCulture)</span>
+            <span>@Model.Daily[^1].Day.ToString("d", CultureInfo.CurrentCulture)</span>
+        </div>
+    }
+</section>
+
+<div class="adm-split">
+    <section class="adm-card">
+        <div class="adm-card-hd">
+            <h2>@L["Account_RecentOrders"]</h2>
+            <a asp-area="Admin" asp-controller="Orders" asp-action="Index">@L["Common_ViewAll"]</a>
+        </div>
+
+        @if (Model.RecentOrders.Count == 0)
+        {
+            <p class="adm-empty">@L["Orders_None"]</p>
+        }
+        else
+        {
+            <table class="adm-table adm-table-cards">
+                <tbody>
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        <tr>
+                            <td data-label="@L["Track_Number"]">
+                                <a class="adm-strong" asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderNumber">@order.OrderNumber</a>
+                                <small>@ShopTime.DateAndTime(order.PlacedUtc)</small>
+                            </td>
+                            <td data-label="@L["Admin_Customer"]">@order.Customer</td>
+                            <td class="num" data-label="@L["Totals_Total"]">@MoneyFormatter.Format(order.Total, order.Currency)</td>
+                            <td data-label="@L["Admin_Status"]">
+                                <span class="status st-@order.Status.ToString().ToLowerInvariant()">@L["OrderStatus_" + order.Status]</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+
+    <section class="adm-card">
+        <div class="adm-card-hd">
+            <h2>@L["Admin_LowStock"]</h2>
+            <a asp-area="Admin" asp-controller="Stock" asp-action="Index">@L["Common_ViewAll"]</a>
+        </div>
+
+        @if (Model.LowStock.Count == 0)
+        {
+            <p class="adm-empty">@L["Admin_StockFine"]</p>
+        }
+        else
+        {
+            <table class="adm-table adm-table-cards">
+                <tbody>
+                    @foreach (var row in Model.LowStock)
+                    {
+                        <tr>
+                            <td data-label="@L["Admin_Product"]">
+                                <a class="adm-strong" asp-area="Admin" asp-controller="Variants" asp-action="Edit" asp-route-id="@row.VariantId">@row.ProductName</a>
+                                <small>@row.Label</small>
+                            </td>
+                            <td class="num" data-label="@L["Admin_Stock"]">
+                                <span class="adm-qty @(row.Stock == 0 ? "is-out" : "is-low")">@row.Stock</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+</div>

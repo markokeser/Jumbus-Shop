@@ -1,0 +1,43 @@
+@{
+    var shop = ShopOptions.Value;
+    var fee = MoneyFormatter.Format(shop.StandardShippingFee, shop.Currency);
+    var free = MoneyFormatter.Format(shop.FreeShippingThreshold, shop.Currency);
+    ViewData["Title"] = "Delivery and payment";
+    ViewData["MetaDescription"] = $"Courier delivery anywhere in Serbia for {fee}, free from {free}. Cash on delivery.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+
+        <h2>Where and how</h2>
+        <p>We deliver to addresses in Serbia, with the courier you choose at checkout: @string.Join(", ", Couriers.All).</p>
+
+        <h2>What it costs</h2>
+        <table class="legal-table">
+            <tbody>
+                <tr><th scope="row">Standard delivery</th><td>@fee</td></tr>
+                <tr><th scope="row">Orders from @free</th><td>free</td></tr>
+            </tbody>
+        </table>
+        <p>You see the exact amount in the cart and at checkout before you place the order.</p>
+
+        <h2>How long it takes</h2>
+        <p>We ship by the next working day after confirming the order. The courier usually delivers within one to three working days. If we cannot deliver within 30 days, we will contact you, and you can withdraw from the purchase and get back everything you paid.</p>
+
+        <h2>Tracking</h2>
+        <p>When the parcel leaves, you get an email with the tracking number. You can also check the order on the <a asp-controller="Orders" asp-action="Track">Track your order</a> page with the order number and your email.</p>
+
+        <h2>Taking delivery</h2>
+        <p>Check the parcel in front of the courier. If it is damaged, ask the courier for a damage report and let us know the same day — we treat it as a complaint.</p>
+
+        <h2>Payment</h2>
+        <ul>
+            <li><strong>Cash on delivery</strong> — paid to the courier when you collect the parcel.</li>
+            <li><strong>Payment card</strong>, where offered at checkout.</li>
+        </ul>
+        <p>All prices are in Serbian dinars and include VAT. The invoice comes with the parcel.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

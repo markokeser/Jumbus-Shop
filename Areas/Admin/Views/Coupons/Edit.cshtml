@@ -1,0 +1,103 @@
+@model CouponFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? L["Admin_NewCoupon"].Value : Model.Code;
+}
+
+<a class="back" asp-area="Admin" asp-controller="Coupons" asp-action="Index">&#8592; @L["Admin_Coupons"]</a>
+
+<header class="adm-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        @if (!Model.IsNew)
+        {
+            <p class="adm-sub">@string.Format(L["Admin_TimesUsed"].Value, Model.TimesUsed)</p>
+        }
+    </div>
+</header>
+
+<form method="post" asp-area="Admin" asp-controller="Coupons" asp-action="Save" class="adm-form adm-narrow">
+    <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <section class="adm-card">
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="Code">@L["Admin_Code"]</label>
+                <input asp-for="Code" spellcheck="false" autocapitalize="characters" class="adm-upper" />
+                <span asp-validation-for="Code"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="DiscountType">@L["Admin_DiscountType"]</label>
+                <select asp-for="DiscountType">
+                    @foreach (var type in Enum.GetValues<DiscountType>())
+                    {
+                        <option value="@type">@L["DiscountType_" + type]</option>
+                    }
+                </select>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="Value">@L["Admin_Value"]</label>
+                <input asp-for="Value" type="number" step="any" value="@InputFormat.Number(Model.Value)" />
+                <small class="hint">@L["Admin_ValueHint"]</small>
+                <span asp-validation-for="Value"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="MaximumDiscount">@L["Admin_MaxDiscount"] <small class="adm-of">@L["Admin_Optional"]</small></label>
+                <input asp-for="MaximumDiscount" type="number" step="any" value="@InputFormat.Number(Model.MaximumDiscount)" />
+                <small class="hint">@L["Admin_MaxDiscountHint"]</small>
+                <span asp-validation-for="MaximumDiscount"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="MinimumSubtotal">@L["Admin_MinSubtotal"] <small class="adm-of">@L["Admin_Optional"]</small></label>
+                <input asp-for="MinimumSubtotal" type="number" step="any" value="@InputFormat.Number(Model.MinimumSubtotal)" />
+                <span asp-validation-for="MinimumSubtotal"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="RestrictedToCategoryId">@L["Admin_OnlyCategory"] <small class="adm-of">@L["Admin_Optional"]</small></label>
+                <select asp-for="RestrictedToCategoryId">
+                    <option value="">@L["Admin_WholeBasket"]</option>
+                    @foreach (var option in Model.Categories)
+                    {
+                        <option value="@option.Value">@option.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="RestrictedToCategoryId"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="StartsLocal">@L["Admin_ValidFrom"]</label>
+                <input asp-for="StartsLocal" type="datetime-local" value="@InputFormat.DateTimeLocal(Model.StartsLocal)" />
+            </div>
+
+            <div class="cinput">
+                <label asp-for="EndsLocal">@L["Admin_ValidUntil"]</label>
+                <input asp-for="EndsLocal" type="datetime-local" value="@InputFormat.DateTimeLocal(Model.EndsLocal)" />
+                <span asp-validation-for="EndsLocal"></span>
+            </div>
+
+            <div class="cinput">
+                <label asp-for="UsageLimit">@L["Admin_UsageLimit"] <small class="adm-of">@L["Admin_Optional"]</small></label>
+                <input asp-for="UsageLimit" type="number" />
+                <span asp-validation-for="UsageLimit"></span>
+            </div>
+        </div>
+
+        <label class="ccheck">
+            <input asp-for="IsActive" />
+            <span>@L["Admin_CouponActive"]</span>
+        </label>
+    </section>
+
+    <div class="adm-actions">
+        <button type="submit" class="btn-shop">@L["Account_Save"]</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

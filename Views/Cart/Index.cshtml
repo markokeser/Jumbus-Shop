@@ -1,0 +1,155 @@
+@model WebShop.ViewModels.Cart.CartViewModel
+@{
+    ViewData["Title"] = L["Cart_Title"].Value;
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell">
+    <nav class="crumbs" aria-label="@L["Crumbs_Label"]">
+        <a asp-controller="Home" asp-action="Index">@L["Crumbs_Home"]</a>
+        <span class="crumb-sep">/</span>
+        <span>@L["Cart_Title"]</span>
+    </nav>
+
+    <header class="listing-head">
+        <h1>@L["Cart_Title"]</h1>
+    </header>
+
+    @if (Model.HasNotices)
+    {
+        <div class="notice">
+            <p>@L["Cart_ThingsChanged"]</p>
+            <ul>
+                @foreach (var dropped in Model.Dropped)
+                {
+                    <li>@string.Format(L["Cart_NoticeRemoved"].Value, dropped.ProductName)</li>
+                }
+                @foreach (var line in Model.Lines.Where(l => l.Notice != WebShop.ViewModels.Cart.CartNotice.None))
+                {
+                    <li>
+                        @if (line.Notice == WebShop.ViewModels.Cart.CartNotice.OutOfStock)
+                        {
+                            @string.Format(L["Cart_NoticeOutOfStock"].Value, line.ProductName)
+                        }
+                        else
+                        {
+                            @string.Format(L["Cart_NoticeReduced"].Value, line.ProductName, line.Quantity)
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (Model.IsEmpty)
+    {
+        <div class="empty">
+            <h2>@L["Cart_EmptyHeading"]</h2>
+            <p>@L["Cart_EmptyBody"]</p>
+            <a class="btn-shop" asp-controller="Products" asp-action="Index">@L["Footer_AllProducts"]</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart">
+            <div class="cart-lines">
+                @foreach (var line in Model.Lines)
+                {
+                    <div class="cline @(line.Quantity == 0 ? "gone" : null)">
+                        <div class="cline-shot">
+                            @if (!string.IsNullOrEmpty(line.ImagePath))
+                            {
+                                <img src="~/@line.ImagePath" alt="@line.ProductName" />
+                            }
+                            else if (!string.IsNullOrEmpty(line.SwatchHex))
+                            {
+                                <i style="background:@line.SwatchHex"></i>
+                            }
+                            else
+                            {
+                                @* Volume-only variants have no colour to show, so the
+                                   box carries the variant itself rather than sitting empty. *@
+                                <span class="cline-mark">@(line.VariantDescription ?? line.Sku)</span>
+                            }
+                        </div>
+
+                        <div class="cline-body">
+                            <span class="brand">@line.BrandName</span>
+                            <a class="cline-name"
+                               asp-controller="Products" asp-action="Details"
+                               asp-route-categorySlug="@line.CategorySlug"
+                               asp-route-productSlug="@line.ProductSlug">@line.ProductName</a>
+
+                            @if (!string.IsNullOrEmpty(line.VariantDescription))
+                            {
+                                <span class="cline-variant">@line.VariantDescription</span>
+                            }
+
+                            <span class="cline-sku">@line.Sku</span>
+                        </div>
+
+                        <div class="cline-qty">
+                            <form method="post" asp-controller="Cart" asp-action="Update">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="variantId" value="@line.VariantId" />
+                                <label class="visually-hidden" for="q-@line.VariantId">@L["Cart_Quantity"]</label>
+                                <input id="q-@line.VariantId" class="qty" type="number" name="quantity"
+                                       value="@line.Quantity" min="1" max="@Math.Min(20, line.Available)" />
+                                <button type="submit" class="linkish">@L["Cart_Update"]</button>
+                            </form>
+
+                            @if (line.Available <= 3 && line.Available > 0)
+                            {
+                                <span class="cline-low">@string.Format(L["Pdp_LowStock"].Value, line.Available)</span>
+                            }
+                        </div>
+
+                        <div class="cline-money">
+                            <span class="now">@MoneyFormatter.Format(line.LineTotal, Model.Totals.Currency)</span>
+
+                            @if (line.IsDiscounted)
+                            {
+                                <span class="was">@((line.ListPrice!.Value * line.Quantity).ToString("N0"))</span>
+                            }
+
+                            <form method="post" asp-controller="Cart" asp-action="Remove">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="variantId" value="@line.VariantId" />
+                                <button type="submit" class="linkish quiet">@L["Cart_Remove"]</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <aside class="cart-summary">
+                <h2>@L["Cart_Summary"]</h2>
+
+                <form method="post" asp-controller="Cart" asp-action="ApplyCoupon" class="coupon">
+                    @Html.AntiForgeryToken()
+                    <label for="coupon">@L["Cart_Coupon"]</label>
+                    <div class="coupon-row">
+                        <input id="coupon" type="text" name="code" value="@Model.CouponCode"
+                               placeholder="@L["Cart_CouponPlaceholder"]" />
+                        <button type="submit" class="btn-shop btn-quiet">@L["Cart_CouponApply"]</button>
+                    </div>
+
+                    @if (Model.CouponProblem is { Length: > 0 } problem)
+                    {
+                        <p class="coupon-problem">@L["Coupon_" + problem]</p>
+                    }
+                </form>
+
+                <partial name="_PriceBreakdown" model="Model.Totals" />
+
+                <a class="btn-shop cart-checkout" asp-controller="Checkout" asp-action="Index">
+                    @L["Cart_Checkout"]
+                </a>
+
+                <a class="cart-continue" asp-controller="Products" asp-action="Index">
+                    @L["Cart_ContinueShopping"]
+                </a>
+            </aside>
+        </div>
+    }
+</div>

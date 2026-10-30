@@ -1,0 +1,50 @@
+@model List<AttributeRow>
+@{
+    ViewData["Title"] = L["Admin_Attributes"].Value;
+}
+
+<header class="adm-head">
+    <div>
+        <h1>@L["Admin_Attributes"]</h1>
+        <p class="adm-sub">@L["Admin_AttributesLede"]</p>
+    </div>
+</header>
+
+<section class="adm-card adm-card-flush">
+    <table class="adm-table adm-table-cards">
+        <thead>
+            <tr>
+                <th>@L["Admin_Name"]</th>
+                <th>@L["Admin_Kind"]</th>
+                <th>@L["Admin_UsedIn"]</th>
+                <th class="num">@L["Admin_Values"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td data-label="@L["Admin_Name"]">
+                        @if (row.DataType == AttributeDataType.Option)
+                        {
+                            <a class="adm-strong" asp-area="Admin" asp-controller="Attributes" asp-action="Options" asp-route-id="@row.Id">@row.Name</a>
+                        }
+                        else
+                        {
+                            <span class="adm-strong">@row.Name</span>
+                        }
+                        <small><code>@row.Code</code></small>
+                    </td>
+                    <td data-label="@L["Admin_Kind"]">
+                        @L["AttributeType_" + row.DataType]@(row.Unit is null ? null : $" ({row.Unit})")
+                        <small>@(row.IsVariantDefining ? L["Admin_PerVariant"] : L["Admin_PerProduct"])</small>
+                    </td>
+                    <td data-label="@L["Admin_UsedIn"]">@string.Join(", ", row.Categories)</td>
+                    <td class="num" data-label="@L["Admin_Values"]">
+                        @(row.DataType == AttributeDataType.Option ? row.Options.ToString() : "—")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

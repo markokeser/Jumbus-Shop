@@ -1,0 +1,126 @@
+@model VariantFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? L["Admin_NewVariant"].Value : Model.Sku;
+
+    ViewDataDictionary Prefixed(string prefix)
+    {
+        var data = new ViewDataDictionary(ViewData);
+        data.TemplateInfo.HtmlFieldPrefix = prefix;
+        return data;
+    }
+}
+
+<a class="back" href="@(Url.Action("Edit", "Products", new { area = "Admin", id = Model.ProductId }) + "#variants")">&#8592; @Model.ProductName</a>
+
+<header class="adm-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="adm-sub">@Model.ProductName · <code>@Model.ProductSku</code></p>
+    </div>
+</header>
+
+<form method="post" asp-area="Admin" asp-controller="Variants" asp-action="Save" class="adm-form">
+    <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ProductId" />
+    <input type="hidden" asp-for="OriginalStock" />
+
+    <section class="adm-card">
+        <div class="adm-card-hd"><h2>@L["Admin_Variant"]</h2></div>
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="Sku">SKU</label>
+                <input asp-for="Sku" spellcheck="false" />
+                <span asp-validation-for="Sku"></span>
+            </div>
+
+            @for (var i = 0; i < Model.Attributes.Count; i++)
+            {
+                <partial name="_AttributeField" model="Model.Attributes[i]" view-data='Prefixed($"Attributes[{i}]")' />
+            }
+        </div>
+    </section>
+
+    <section class="adm-card">
+        <div class="adm-card-hd"><h2>@L["Admin_Price"]</h2></div>
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="Price">@L["Admin_RegularPrice"] (@Shop.Value.Currency)</label>
+                <input asp-for="Price" type="number" step="any" value="@InputFormat.Number(Model.Price)" />
+                <span asp-validation-for="Price"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="SalePrice">@L["Admin_SalePrice"] (@Shop.Value.Currency)</label>
+                <input asp-for="SalePrice" type="number" step="any" value="@InputFormat.Number(Model.SalePrice)" />
+                <span asp-validation-for="SalePrice"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="SaleStartsLocal">@L["Admin_SaleStarts"]</label>
+                <input asp-for="SaleStartsLocal" type="datetime-local" value="@InputFormat.DateTimeLocal(Model.SaleStartsLocal)" />
+            </div>
+            <div class="cinput">
+                <label asp-for="SaleEndsLocal">@L["Admin_SaleEnds"]</label>
+                <input asp-for="SaleEndsLocal" type="datetime-local" value="@InputFormat.DateTimeLocal(Model.SaleEndsLocal)" />
+                <span asp-validation-for="SaleEndsLocal"></span>
+            </div>
+        </div>
+        <p class="hint">@L["Admin_SaleHint"]</p>
+    </section>
+
+    <section class="adm-card">
+        <div class="adm-card-hd"><h2>@L["Admin_Stock"]</h2></div>
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="StockQuantity">@L["Admin_InStock"]</label>
+                <input asp-for="StockQuantity" type="number" />
+                <span asp-validation-for="StockQuantity"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="LowStockThreshold">@L["Admin_ReorderAt"]</label>
+                <input asp-for="LowStockThreshold" type="number" />
+                <span asp-validation-for="LowStockThreshold"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="ExpiryDate">@L["Admin_Expiry"] <small class="adm-of">@L["Admin_Optional"]</small></label>
+                <input asp-for="ExpiryDate" type="date" value="@InputFormat.Date(Model.ExpiryDate)" />
+            </div>
+            <div class="cinput">
+                <label asp-for="WeightGrams">@L["Admin_Weight"] <small class="adm-of">@L["Admin_Optional"]</small></label>
+                <input asp-for="WeightGrams" type="number" />
+                <span asp-validation-for="WeightGrams"></span>
+            </div>
+        </div>
+
+        <label class="ccheck">
+            <input asp-for="IsActive" />
+            <span>@L["Admin_VariantActive"]</span>
+        </label>
+    </section>
+
+    <div class="adm-actions">
+        <button type="submit" class="btn-shop">@(Model.IsNew ? L["Admin_AddVariant"] : L["Account_Save"])</button>
+    </div>
+</form>
+
+@if (!Model.IsNew)
+{
+    <section class="adm-card adm-danger">
+        @if (Model.HasOrders)
+        {
+            <p class="hint">@L["Admin_VariantInUse"]</p>
+        }
+        else
+        {
+            <form method="post" asp-area="Admin" asp-controller="Variants" asp-action="Delete" asp-route-id="@Model.Id"
+                  data-confirm="@L["Admin_ConfirmDelete"]">
+                <input type="hidden" name="productId" value="@Model.ProductId" />
+                <button type="submit" class="btn-shop btn-quiet">@L["Admin_DeleteVariant"]</button>
+            </form>
+        }
+    </section>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ConfirmScript" />
+}

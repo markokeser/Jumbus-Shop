@@ -1,0 +1,15 @@
+@model WebShop.Models.Orders.Order
+@{
+    ViewData["Title"] = string.Format(L["Confirm_Title"].Value, Model.OrderNumber);
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Orders";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <a class="back" asp-controller="Orders" asp-action="Index">&#8592; @L["Nav_MyOrders"]</a>
+        <partial name="_OrderDetail" model="Model" />
+    </div>
+</div>

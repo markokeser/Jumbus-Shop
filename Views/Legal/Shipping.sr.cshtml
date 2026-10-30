@@ -1,0 +1,44 @@
+@{
+    var shop = ShopOptions.Value;
+    var fee = MoneyFormatter.Format(shop.StandardShippingFee, shop.Currency);
+    var free = MoneyFormatter.Format(shop.FreeShippingThreshold, shop.Currency);
+    ViewData["Title"] = "Dostava i plaćanje";
+    ViewData["MetaDescription"] = $"Dostava kurirskom službom širom Srbije za {fee}, besplatna od {free}. Plaćanje pouzećem.";
+}
+@* Rokove slanja uskladiti sa stvarnim radom magacina. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+
+        <h2>Gde i kako</h2>
+        <p>Dostavljamo na adrese u Srbiji, kurirskom službom koju izaberete pri plaćanju: @string.Join(", ", Couriers.All).</p>
+
+        <h2>Koliko košta</h2>
+        <table class="legal-table">
+            <tbody>
+                <tr><th scope="row">Standardna dostava</th><td>@fee</td></tr>
+                <tr><th scope="row">Porudžbine od @free</th><td>besplatno</td></tr>
+            </tbody>
+        </table>
+        <p>Tačan iznos vidite u korpi i na stranici za plaćanje, pre slanja porudžbine.</p>
+
+        <h2>Koliko traje</h2>
+        <p>Porudžbinu šaljemo najkasnije sledećeg radnog dana od potvrde. Kurir je obično isporučuje za jedan do tri radna dana. Ako robu ne možemo da isporučimo u roku od 30 dana, javićemo vam se, a vi možete da odustanete od kupovine i dobijete nazad sve što ste platili.</p>
+
+        <h2>Praćenje pošiljke</h2>
+        <p>Kada paket pošaljemo, dobijate mejl sa brojem pošiljke. Status porudžbine možete da vidite i na stranici <a asp-controller="Orders" asp-action="Track">Praćenje porudžbine</a>, uz broj porudžbine i imejl.</p>
+
+        <h2>Preuzimanje</h2>
+        <p>Pregledajte paket pred kurirom. Ako je oštećen, zatražite od kurira zapisnik o oštećenju i javite nam se istog dana — rešićemo to kao reklamaciju.</p>
+
+        <h2>Plaćanje</h2>
+        <ul>
+            <li><strong>Pouzećem</strong> — gotovinom kuriru, pri preuzimanju.</li>
+            <li><strong>Platnom karticom</strong>, kada je ponuđeno na stranici za plaćanje.</li>
+        </ul>
+        <p>Sve cene su u dinarima, sa PDV-om. Uz paket dobijate račun.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

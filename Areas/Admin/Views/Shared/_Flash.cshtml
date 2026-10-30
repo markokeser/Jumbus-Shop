@@ -1,0 +1,6 @@
+@if (TempData["Flash"] is string flash)
+{
+    <div class="notice @(TempData["FlashBad"] is true ? "notice-bad" : "notice-good") adm-flash" role="status">
+        <p>@flash</p>
+    </div>
+}

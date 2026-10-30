@@ -1,0 +1,28 @@
+@model AdminPage
+@{
+    string Link(int page)
+    {
+        var pairs = Context.Request.Query
+            .Where(q => !string.Equals(q.Key, "page", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(q => q.Value.Select(v => new KeyValuePair<string, string?>(q.Key, v)))
+            .ToList();
+
+        pairs.Add(new("page", page.ToString(CultureInfo.InvariantCulture)));
+        return Context.Request.Path + QueryString.Create(pairs).ToUriComponent();
+    }
+}
+
+@if (Model.Count > 1)
+{
+    <nav class="adm-pager" aria-label="@L["Pager_Label"]">
+        @if (Model.Number > 1)
+        {
+            <a href="@Link(Model.Number - 1)">&#8592; @L["Pager_Previous"]</a>
+        }
+        <span>@string.Format(L["Admin_PageOf"].Value, Model.Number, Model.Count)</span>
+        @if (Model.Number < Model.Count)
+        {
+            <a href="@Link(Model.Number + 1)">@L["Pager_Next"] &#8594;</a>
+        }
+    </nav>
+}

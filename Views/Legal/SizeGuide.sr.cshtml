@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Tabela veličina";
+    ViewData["MetaDescription"] = "Mere grudi, struka i kukova za veličine XS–XXL i kako da se izmerite.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p>Mere su u centimetrima i odnose se na telo, ne na odevni predmet. Gde se kroj nekog proizvoda razlikuje, to piše u njegovom opisu.</p>
+
+        <partial name="_SizeChart" />
+
+        <h2>Kako da se izmerite</h2>
+        <ul>
+            <li><strong>Grudi</strong> — preko najisturenijeg dela, sa metrom vodoravno ispod pazuha.</li>
+            <li><strong>Struk</strong> — na najužem delu, obično malo iznad pupka.</li>
+            <li><strong>Kukovi</strong> — preko najširog dela, oko 20 cm ispod struka.</li>
+        </ul>
+        <p>Merite preko donjeg veša, sa metrom koji naleže, ali ne steže. Ako ste između dve veličine, za uske krojeve izaberite veću.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

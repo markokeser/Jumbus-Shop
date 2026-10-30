@@ -1,0 +1,57 @@
+@{
+    var company = ShopOptions.Value.Company;
+    ViewData["Title"] = "Withdrawal form";
+    ViewData["MetaDescription"] = "The form for withdrawing from a distance contract, with the seller's details, ready to print.";
+}
+@* English rendering of the official Serbian form (Sl. glasnik RS 21/2022).
+   Keep the fields and their order as in WithdrawalForm.sr.cshtml. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1 class="no-print">@ViewData["Title"]</h1>
+        <p class="no-print">Fill in and send this form only if you want to withdraw from a purchase. Print it and post it, or fill it in and email it to <a href="mailto:@company.Email">@company.Email</a>. Any other clear statement works too. The conditions are on the <a asp-action="Returns">Returns and complaints</a> page.</p>
+        <p class="no-print"><button type="button" class="btn-shop btn-quiet" data-print>Print or save as PDF</button></p>
+
+        <section class="wform" aria-labelledby="wform-title">
+            <p class="wform-kind">Form</p>
+            <h2 id="wform-title">Statement of withdrawal from a contract concluded at a distance or off business premises</h2>
+
+            <h3>Completed by the trader</h3>
+            <dl class="wform-filled">
+                <dt>Name:</dt><dd>@company.LegalName</dd>
+                <dt>Address:</dt><dd>@company.Address</dd>
+                <dt>Phone/fax:</dt><dd>@company.Phone</dd>
+                <dt>Email:</dt><dd>@company.Email</dd>
+            </dl>
+
+            <h3>Completed by the consumer</h3>
+            <p>I hereby give notice that I withdraw from the contract for the sale of the following goods/services (*):</p>
+            <div class="wform-line tall"></div>
+
+            <div class="wform-pair">
+                <div><span>Date the contract was concluded</span><div class="wform-line"></div></div>
+                <div><span>Date the goods were received</span><div class="wform-line"></div></div>
+            </div>
+
+            <p>Reasons for withdrawal (optional):</p>
+            <div class="wform-line tall"></div>
+
+            <p>Consumer's name:</p>
+            <div class="wform-line"></div>
+
+            <p>Consumer's address:</p>
+            <div class="wform-line"></div>
+
+            <div class="wform-pair">
+                <div><span>Consumer's signature (if sent by post or fax):</span><div class="wform-line"></div></div>
+                <div><span>Date (of completing the form):</span><div class="wform-line"></div></div>
+            </div>
+
+            <p class="wform-note">(*) Delete as appropriate.</p>
+        </section>
+
+        <p class="no-print legal-muted">Tip: add the order number next to the goods and, if you paid cash on delivery, your bank account number for the refund.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

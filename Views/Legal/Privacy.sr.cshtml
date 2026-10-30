@@ -1,0 +1,82 @@
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Politika privatnosti";
+    ViewData["MetaDescription"] = $"Koje podatke {shop.Name} prikuplja, zašto, koliko ih čuva i kako ostvarujete svoja prava.";
+}
+@* Nacrt usklađen sa Zakonom o zaštiti podataka o ličnosti (Sl. glasnik RS 87/2018).
+   Pre puštanja u rad: proveriti spisak obrađivača (hosting, knjigovodstvo,
+   procesor plaćanja) i rokove čuvanja logova kod hosting provajdera. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">Važi od 30. oktobra 2026.</p>
+
+        <h2>1. Ko obrađuje vaše podatke</h2>
+        <p>Rukovalac podacima o ličnosti je:</p>
+        <partial name="_Company" />
+        <p>Za sva pitanja o podacima pišite na <a href="mailto:@shop.Company.Email">@shop.Company.Email</a>.</p>
+
+        <h2>2. Koje podatke prikupljamo</h2>
+        <ul>
+            <li><strong>Porudžbina:</strong> ime i prezime, imejl, telefon, adresa za isporuku i, ako ih unesete, adresa za račun, naziv firme i PIB; proizvodi, iznosi, način i status plaćanja, kurirska služba, broj pošiljke i vaša napomena.</li>
+            <li><strong>Nalog</strong>, ako ga otvorite: imejl, ime, prezime, telefon, lozinka (čuvamo samo njen kriptografski otisak, nikada samu lozinku), izabrani jezik, sačuvane adrese, lista želja i datum registracije.</li>
+            <li><strong>Recenzije:</strong> ocena i tekst; uz recenziju objavljujemo vaše ime i prvo slovo prezimena.</li>
+            <li><strong>Novosti i ponude</strong>, ako ste ih izabrali: imejl i podatak da ste pristali.</li>
+            <li><strong>Tehnički podaci:</strong> IP adresa i vreme pristupa, u evidenciji servera i za ograničavanje broja pokušaja prijave; neophodni <a asp-action="Cookies">kolačići</a>. Korpa gosta čuva se na serveru dok je koristite.</li>
+        </ul>
+        <p>Podaci o platnoj kartici ne dolaze do nas: unosite ih kod procesora plaćanja.</p>
+
+        <h2>3. Zašto ih obrađujemo i na osnovu čega</h2>
+        <table class="legal-table">
+            <thead><tr><th scope="col">Svrha</th><th scope="col">Pravni osnov</th></tr></thead>
+            <tbody>
+                <tr><td>Prijem, isporuka i naplata porudžbine; odustanak, povraćaj i reklamacije; korisnički nalog</td><td>izvršenje ugovora (čl. 12. st. 1. tač. 2) ZZPL)</td></tr>
+                <tr><td>Računi, poslovne knjige, evidencija reklamacija</td><td>zakonska obaveza (čl. 12. st. 1. tač. 3) ZZPL)</td></tr>
+                <tr><td>Bezbednost sajta, sprečavanje zloupotreba i prevara</td><td>legitimni interes (čl. 12. st. 1. tač. 6) ZZPL)</td></tr>
+                <tr><td>Novosti i ponude imejlom</td><td>vaš pristanak (čl. 12. st. 1. tač. 1) ZZPL), koji možete da povučete kad god hoćete</td></tr>
+            </tbody>
+        </table>
+        <p>Ne pravimo profile kupaca i ne donosimo odluke o vama automatski.</p>
+
+        <h2>4. Kome ih dajemo</h2>
+        <ul>
+            <li><strong>Kurirskoj službi</strong> koju ste izabrali (ime, adresa, telefon, iznos za naplatu pouzećem) — da bi paket stigao.</li>
+            <li><strong>Procesoru plaćanja</strong>, kada plaćate karticom.</li>
+            <li><strong>Pružaocima usluga</strong> koji za nas obrađuju podatke po ugovoru: hosting, IT podrška, knjigovodstvo. Smeju da ih koriste samo za tu uslugu.</li>
+            <li><strong>Državnim organima</strong>, samo kada to zakon nalaže.</li>
+        </ul>
+        <p>Podatke ne prodajemo i ne dajemo ih drugima za njihov marketing. Ako neki obrađivač čuva podatke van Srbije, prenos je dozvoljen samo u zemlje sa primerenim nivoom zaštite ili uz zaštitne mere koje propisuje ZZPL.</p>
+
+        <h2>5. Koliko dugo ih čuvamo</h2>
+        <ul>
+            <li>Nalog, adrese i listu želja — dok nalog ne obrišete.</li>
+            <li>Porudžbine i račune — onoliko koliko nalažu propisi o računovodstvu i porezima, i kad obrišete nalog.</li>
+            <li>Reklamacije — najmanje dve godine od podnošenja, kako propisuje Zakon o zaštiti potrošača.</li>
+            <li>Recenzije — dok ne obrišete nalog; na vaš zahtev i ranije.</li>
+            <li>Pristanak za novosti — dok ga ne povučete.</li>
+            <li>Tehničke evidencije — onoliko koliko je potrebno za bezbednost sistema.</li>
+        </ul>
+
+        <h2>6. Vaša prava</h2>
+        <p>Imate pravo da:</p>
+        <ul>
+            <li>saznate da li obrađujemo vaše podatke i dobijete njihovu kopiju (čl. 26);</li>
+            <li>tražite ispravku netačnih ili dopunu nepotpunih podataka (čl. 29);</li>
+            <li>tražite brisanje podataka (čl. 30) i ograničenje obrade (čl. 31);</li>
+            <li>dobijete podatke u mašinski čitljivom obliku i prenesete ih drugom rukovaocu (čl. 36);</li>
+            <li>podnesete prigovor na obradu zasnovanu na legitimnom interesu (čl. 37);</li>
+            <li>povučete pristanak, bez uticaja na obradu pre povlačenja (čl. 15);</li>
+            <li>podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti (<a href="https://www.poverenik.rs" rel="noopener">www.poverenik.rs</a>) (čl. 82).</li>
+        </ul>
+        <p>Ako imate nalog, u delu <em>Moji podaci</em> možete sami da preuzmete svoje podatke i da obrišete nalog. Za ostalo nam pišite; odgovaramo bez odlaganja, a najkasnije u roku od 30 dana. Taj rok može da se produži za još 60 dana kada je zahtev složen, o čemu vas obaveštavamo.</p>
+
+        <h2>7. Kako ih štitimo</h2>
+        <p>Sajt radi preko šifrovane veze (HTTPS). Lozinke čuvamo samo kao kriptografski otisak. Nalog se privremeno zaključava posle deset pogrešnih pokušaja prijave. Podacima pristupaju samo zaposleni kojima su potrebni za posao.</p>
+
+        <h2>8. Izmene</h2>
+        <p>O važnim izmenama ove politike obavestićemo vas na sajtu, a vlasnike naloga i imejlom.</p>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

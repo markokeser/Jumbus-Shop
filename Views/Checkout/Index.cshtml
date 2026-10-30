@@ -1,0 +1,225 @@
+@model WebShop.ViewModels.Checkout.CheckoutPageViewModel
+@{
+    ViewData["Title"] = L["Checkout_Title"].Value;
+    ViewData["NoIndex"] = true;
+    var form = Model.Form;
+}
+
+<div class="shell">
+    <nav class="crumbs" aria-label="@L["Crumbs_Label"]">
+        <a asp-controller="Home" asp-action="Index">@L["Crumbs_Home"]</a>
+        <span class="crumb-sep">/</span>
+        <a asp-controller="Cart" asp-action="Index">@L["Cart_Title"]</a>
+        <span class="crumb-sep">/</span>
+        <span>@L["Checkout_Title"]</span>
+    </nav>
+
+    <header class="listing-head">
+        <h1>@L["Checkout_Title"]</h1>
+    </header>
+
+    @if (Model.Problem is { Length: > 0 })
+    {
+        <div class="notice notice-bad">
+            @if (Model.SoldOutProduct is { Length: > 0 } soldOut)
+            {
+                <p>@string.Format(L["Checkout_SoldOut"].Value, soldOut)</p>
+            }
+            else
+            {
+                <p>@L["Checkout_" + Model.Problem]</p>
+            }
+        </div>
+    }
+
+    <form method="post" asp-controller="Checkout" asp-action="Place" class="checkout">
+        @Html.AntiForgeryToken()
+
+        <div class="checkout-form">
+            <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+
+            <fieldset class="cfield">
+                <legend>@L["Checkout_ContactLegend"]</legend>
+
+                <div class="crow">
+                    <div class="cinput">
+                        <label asp-for="Form.FirstName">@L["Checkout_FirstName"]</label>
+                        <input asp-for="Form.FirstName" autocomplete="given-name" />
+                        <span asp-validation-for="Form.FirstName"></span>
+                    </div>
+                    <div class="cinput">
+                        <label asp-for="Form.LastName">@L["Checkout_LastName"]</label>
+                        <input asp-for="Form.LastName" autocomplete="family-name" />
+                        <span asp-validation-for="Form.LastName"></span>
+                    </div>
+                </div>
+
+                <div class="crow">
+                    <div class="cinput">
+                        <label asp-for="Form.Email">@L["Checkout_Email"]</label>
+                        <input asp-for="Form.Email" type="email" autocomplete="email" />
+                        <span asp-validation-for="Form.Email"></span>
+                    </div>
+                    <div class="cinput">
+                        <label asp-for="Form.PhoneNumber">@L["Checkout_Phone"]</label>
+                        <input asp-for="Form.PhoneNumber" type="tel" autocomplete="tel" />
+                        <span asp-validation-for="Form.PhoneNumber"></span>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="cfield">
+                <legend>@L["Checkout_DeliveryLegend"]</legend>
+
+                <div class="crow">
+                    <div class="cinput wide">
+                        <label asp-for="Form.Street">@L["Checkout_Street"]</label>
+                        <input asp-for="Form.Street" autocomplete="address-line1" />
+                        <span asp-validation-for="Form.Street"></span>
+                    </div>
+                    <div class="cinput narrow">
+                        <label asp-for="Form.StreetNumber">@L["Checkout_StreetNumber"]</label>
+                        <input asp-for="Form.StreetNumber" />
+                        <span asp-validation-for="Form.StreetNumber"></span>
+                    </div>
+                </div>
+
+                <div class="crow">
+                    <div class="cinput">
+                        <label asp-for="Form.City">@L["Checkout_City"]</label>
+                        <input asp-for="Form.City" autocomplete="address-level2" />
+                        <span asp-validation-for="Form.City"></span>
+                    </div>
+                    <div class="cinput narrow">
+                        <label asp-for="Form.PostalCode">@L["Checkout_PostalCode"]</label>
+                        <input asp-for="Form.PostalCode" autocomplete="postal-code" inputmode="numeric" />
+                        <span asp-validation-for="Form.PostalCode"></span>
+                    </div>
+                </div>
+
+                <div class="cinput">
+                    <label asp-for="Form.Courier">@L["Checkout_Courier"]</label>
+                    <select asp-for="Form.Courier">
+                        @foreach (var courier in Model.Couriers)
+                        {
+                            <option value="@courier" selected="@(form.Courier == courier)">@courier</option>
+                        }
+                    </select>
+                </div>
+
+                <label class="ccheck">
+                    <input asp-for="Form.DifferentBillingAddress" data-toggle="#billing" />
+                    <span>@L["Checkout_DifferentBilling"]</span>
+                </label>
+
+                <div id="billing" class="csub" hidden="@(!form.DifferentBillingAddress)">
+                    <div class="crow">
+                        <div class="cinput wide">
+                            <label asp-for="Form.BillingStreet">@L["Checkout_Street"]</label>
+                            <input asp-for="Form.BillingStreet" />
+                            <span asp-validation-for="Form.BillingStreet"></span>
+                        </div>
+                    </div>
+                    <div class="crow">
+                        <div class="cinput">
+                            <label asp-for="Form.BillingCity">@L["Checkout_City"]</label>
+                            <input asp-for="Form.BillingCity" />
+                            <span asp-validation-for="Form.BillingCity"></span>
+                        </div>
+                        <div class="cinput narrow">
+                            <label asp-for="Form.BillingPostalCode">@L["Checkout_PostalCode"]</label>
+                            <input asp-for="Form.BillingPostalCode" inputmode="numeric" />
+                            <span asp-validation-for="Form.BillingPostalCode"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <label class="ccheck">
+                    <input asp-for="Form.WantsInvoice" data-toggle="#invoice" />
+                    <span>@L["Checkout_WantsInvoice"]</span>
+                </label>
+
+                <div id="invoice" class="csub" hidden="@(!form.WantsInvoice)">
+                    <div class="crow">
+                        <div class="cinput">
+                            <label asp-for="Form.CompanyName">@L["Checkout_CompanyName"]</label>
+                            <input asp-for="Form.CompanyName" />
+                            <span asp-validation-for="Form.CompanyName"></span>
+                        </div>
+                        <div class="cinput narrow">
+                            <label asp-for="Form.CompanyTaxNumber">@L["Checkout_TaxNumber"]</label>
+                            <input asp-for="Form.CompanyTaxNumber" inputmode="numeric" maxlength="9" />
+                            <span asp-validation-for="Form.CompanyTaxNumber"></span>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="cfield">
+                <legend>@L["Checkout_PaymentLegend"]</legend>
+
+                <label class="cradio">
+                    <input type="radio" asp-for="Form.PaymentMethod" value="CashOnDelivery" />
+                    <span>
+                        <b>@L["Payment_CashOnDelivery"]</b>
+                        <small>@L["Payment_CashOnDeliveryNote"]</small>
+                    </span>
+                </label>
+
+                <label class="cradio">
+                    <input type="radio" asp-for="Form.PaymentMethod" value="Card" />
+                    <span>
+                        <b>@L["Payment_Card"]</b>
+                        <small>@L["Payment_CardNote"]</small>
+                    </span>
+                </label>
+            </fieldset>
+
+            <fieldset class="cfield">
+                <legend>@L["Checkout_NoteLegend"]</legend>
+                <div class="cinput">
+                    <label asp-for="Form.Note">@L["Checkout_Note"]</label>
+                    <textarea asp-for="Form.Note" rows="3"></textarea>
+                </div>
+            </fieldset>
+
+            <label class="ccheck">
+                <input asp-for="Form.AcceptsTerms" />
+                <span>@L["Checkout_AcceptTerms"]</span>
+            </label>
+            <span asp-validation-for="Form.AcceptsTerms"></span>
+        </div>
+
+        <aside class="checkout-summary">
+            <h2>@L["Cart_Summary"]</h2>
+
+            <ul class="mini-lines">
+                @foreach (var line in Model.Cart.Lines)
+                {
+                    <li>
+                        <span class="mini-qty">@line.Quantity&#215;</span>
+                        <span class="mini-name">
+                            @line.ProductName
+                            @if (!string.IsNullOrEmpty(line.VariantDescription))
+                            {
+                                <small>@line.VariantDescription</small>
+                            }
+                        </span>
+                        <span class="mini-sum">@MoneyFormatter.Format(line.LineTotal, Model.Cart.Totals.Currency)</span>
+                    </li>
+                }
+            </ul>
+
+            <partial name="_PriceBreakdown" model="Model.Cart.Totals" />
+
+            <button type="submit" class="btn-shop checkout-place">@L["Checkout_Place"]</button>
+
+            <p class="checkout-legal">@L["Checkout_LegalNote"]</p>
+        </aside>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/checkout.js" asp-append-version="true"></script>
+}

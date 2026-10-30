@@ -1,0 +1,12 @@
+<script>
+    // Forms that delete or move stock ask once before submitting. An empty
+    // data-confirm means "no question": Razor writes data-confirm="" rather
+    // than dropping the attribute when its value is null on a form tag helper.
+    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+        var question = form.getAttribute('data-confirm');
+        if (!question) { return; }
+        form.addEventListener('submit', function (e) {
+            if (!window.confirm(question)) { e.preventDefault(); }
+        });
+    });
+</script>

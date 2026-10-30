@@ -1,0 +1,24 @@
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Contact";
+    ViewData["MetaDescription"] = $"How to reach {shop.Name}: email, phone and the seller's address.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p>Email gets the quickest answer. If it is about an order, include its number — it is in the confirmation email.</p>
+
+        <partial name="_Company" />
+
+        <h2>Where to go for what</h2>
+        <ul>
+            <li>Withdrawing from a purchase — the <a asp-action="WithdrawalForm">withdrawal form</a> and the <a asp-action="Returns" asp-fragment="odustanak">conditions</a>.</li>
+            <li>Damaged or wrong goods — <a asp-action="Returns" asp-fragment="reklamacija">complaints</a>.</li>
+            <li>Where is my parcel — <a asp-controller="Orders" asp-action="Track">track your order</a>.</li>
+            <li>Your data — the <a asp-action="Privacy">privacy policy</a> and, with an account, <em>My data</em>.</li>
+        </ul>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

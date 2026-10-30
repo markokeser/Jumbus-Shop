@@ -1,0 +1,94 @@
+@{
+    var shop = ShopOptions.Value;
+    var company = shop.Company;
+    ViewData["Title"] = "Reklamacije i povraćaj";
+    ViewData["MetaDescription"] = $"Odustanak od kupovine u roku od {shop.ReturnDays} dana, povraćaj novca, reklamacije i vansudsko rešavanje sporova.";
+}
+@* Rokovi prate Zakon o zaštiti potrošača (Sl. glasnik RS 88/2021): odustanak
+   čl. 27–36, saobraznost i reklamacije od čl. 50, i deo o vansudskom
+   rešavanju potrošačkih sporova. Pre puštanja u rad treba da ih pregleda
+   pravnik. Ako prodavnica odluči da sama plaća povratnu dostavu, promenite
+   odeljak „Troškovi i stanje robe" na obe jezičke verzije. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">Važi od 30. oktobra 2026.</p>
+
+        <nav class="legal-toc" aria-label="Sadržaj">
+            <a href="#odustanak">Odustanak od kupovine</a>
+            <a href="#reklamacija">Reklamacija</a>
+            <a href="#vansudsko">Vansudsko rešavanje sporova</a>
+        </nav>
+
+        <section id="odustanak">
+            <h2>Odustanak od kupovine</h2>
+            <p>Kupovinu možete da otkažete u roku od <strong>@shop.ReturnDays dana od dana kada ste primili robu</strong>, bez navođenja razloga. Ako ste u jednoj porudžbini dobili više paketa, rok teče od prijema poslednjeg.</p>
+
+            <h3>Kako</h3>
+            <ol>
+                <li>Pošaljite nam <a asp-action="WithdrawalForm">obrazac za odustanak</a> ili bilo kakvu jasnu izjavu da odustajete — imejlom na <a href="mailto:@company.Email">@company.Email</a> ili poštom na adresu ispod. Navedite broj porudžbine. Rok je ispoštovan ako izjavu pošaljete pre njegovog isteka.</li>
+                <li>Prijem izjave potvrđujemo imejlom, bez odlaganja.</li>
+                <li>Robu vratite najkasnije <strong>14 dana od dana kada ste poslali izjavu</strong>, na adresu: <strong>@company.LegalName, @company.ReturnsTo</strong>.</li>
+            </ol>
+
+            <h3>Troškovi i stanje robe</h3>
+            <p>Direktne troškove vraćanja robe snosite vi. Robu smete da pregledate kao u prodavnici: da je probate i vidite kako stoji. Za umanjenu vrednost odgovarate samo ako ste je koristili više od toga, na primer nosili je ili oprali, ili ako ste uklonili etikete.</p>
+
+            <h3>Povraćaj novca</h3>
+            <p>Vraćamo sve što ste platili, uključujući troškove standardne dostave, <strong>najkasnije 14 dana od dana kada smo primili vašu izjavu</strong>. Povraćaj možemo da zadržimo dok ne primimo robu ili dokaz da ste je poslali, šta god se desi pre.</p>
+            <ul>
+                <li>Ako ste platili karticom, novac vraćamo na istu karticu.</li>
+                <li>Ako ste platili pouzećem, uz izjavu nam pošaljite broj tekućeg računa, pa novac uplaćujemo na njega, bez ikakvih troškova za vas.</li>
+            </ul>
+
+            <h3>Kada odustanak nije moguć</h3>
+            <p>Zakon izuzima robu kod koje to nije opravdano. Kod nas se to odnosi na:</p>
+            <ul>
+                <li><strong>kozmetiku i parfeme čije je zaštitno pakovanje otvoreno</strong> posle isporuke — zapečaćenu robu koja se iz zdravstvenih ili higijenskih razloga ne može vratiti kada se otvori: skinuta folija, otvoren čep, oštećena nalepnica-pečat;</li>
+                <li>robu izrađenu po vašim merama ili posebno prilagođenu vama.</li>
+            </ul>
+            <p>Neotvorena kozmetika može da se vrati kao i svaka druga roba.</p>
+        </section>
+
+        <section id="reklamacija">
+            <h2>Reklamacija</h2>
+            <p>Odgovaramo za nesaobraznost robe ugovoru — oštećenje, grešku u izradi, pogrešan proizvod, veličinu ili nijansu — koja se pojavi u roku od <strong>dve godine od prijema</strong>. Ako se nesaobraznost pojavi u prvih šest meseci, smatra se da je postojala već pri isporuci, osim ako mi dokažemo suprotno.</p>
+
+            <h3>Kako se podnosi</h3>
+            <p>Imejlom na <a href="mailto:@company.Email">@company.Email</a>, telefonom na @company.Phone ili pismom na adresu prodavca. Priložite dokaz o kupovini — račun, potvrdu porudžbine ili izvod sa računa — i, ako možete, fotografiju nedostatka. Navedite šta tražite.</p>
+
+            <h3>Rokovi</h3>
+            <ul>
+                <li>Prijem reklamacije potvrđujemo bez odlaganja, uz broj pod kojim je zavedena.</li>
+                <li>Odgovor da li reklamaciju prihvatamo, sa obrazloženjem i predlogom rešenja, šaljemo <strong>najkasnije u roku od 8 dana</strong> od prijema.</li>
+                <li>Reklamaciju rešavamo <strong>najkasnije u roku od 15 dana</strong> od podnošenja.</li>
+            </ul>
+
+            <h3>Šta možete da tražite</h3>
+            <ul>
+                <li>da se roba popravi ili zameni — vi birate;</li>
+                <li>umanjenje cene ili raskid ugovora, ako popravka ili zamena nije moguća ili je ne obavimo u razumnom roku;</li>
+                <li>ako se nesaobraznost pojavi u prvih šest meseci, odmah zamenu, umanjenje cene ili raskid.</li>
+            </ul>
+            <p>Sve troškove otklanjanja nesaobraznosti, i troškove slanja robe, snosimo mi. Reklamacije vodimo u evidenciji koju čuvamo najmanje dve godine.</p>
+        </section>
+
+        <section id="vansudsko">
+            <h2>Vansudsko rešavanje sporova</h2>
+            <p>Ako reklamaciju ili prigovor nismo rešili onako kako očekujete, možete da pokrenete postupak vansudskog rešavanja potrošačkog spora pred telom sa liste koju vodi ministarstvo nadležno za zaštitu potrošača. Lista je objavljena na sajtu tog ministarstva.</p>
+            <ul>
+                <li>Pre toga treba da ste nam reklamaciju ili prigovor već podneli.</li>
+                <li>Mi smo dužni da učestvujemo u postupku.</li>
+                <li>Postupak je za stranke besplatan; svako snosi samo svoje troškove, na primer zastupanja ili puta.</li>
+                <li>Traje najduže 90 dana, a u složenim slučajevima može da se produži još jednom za 90 dana.</li>
+            </ul>
+            <p>Time ne gubite pravo da se obratite sudu.</p>
+        </section>
+
+        <h2>Prodavac</h2>
+        <partial name="_Company" />
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

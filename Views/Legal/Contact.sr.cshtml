@@ -1,0 +1,24 @@
+@{
+    var shop = ShopOptions.Value;
+    ViewData["Title"] = "Kontakt";
+    ViewData["MetaDescription"] = $"Kako da kontaktirate {shop.Name}: imejl, telefon i adresa prodavca.";
+}
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p>Najbrže odgovaramo na imejl. Ako se javljate zbog porudžbine, napišite njen broj — nalazi se u mejlu o prijemu.</p>
+
+        <partial name="_Company" />
+
+        <h2>Za šta gde</h2>
+        <ul>
+            <li>Odustanak od kupovine — <a asp-action="WithdrawalForm">obrazac za odustanak</a> i <a asp-action="Returns" asp-fragment="odustanak">uslovi</a>.</li>
+            <li>Oštećena ili pogrešna roba — <a asp-action="Returns" asp-fragment="reklamacija">reklamacija</a>.</li>
+            <li>Gde je paket — <a asp-controller="Orders" asp-action="Track">praćenje porudžbine</a>.</li>
+            <li>Vaši podaci — <a asp-action="Privacy">politika privatnosti</a>, a ako imate nalog, deo <em>Moji podaci</em>.</li>
+        </ul>
+    </article>
+
+    <partial name="_LegalNav" />
+</div>

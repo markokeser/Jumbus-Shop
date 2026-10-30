@@ -1,0 +1,59 @@
+@model AttributeOptionFormViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? L["Admin_NewValue"].Value : Model.LabelSr;
+}
+
+<a class="back" asp-area="Admin" asp-controller="Attributes" asp-action="Options" asp-route-id="@Model.AttributeDefinitionId">&#8592; @Model.AttributeName</a>
+<header class="adm-head"><h1>@ViewData["Title"]</h1></header>
+
+<form method="post" asp-area="Admin" asp-controller="Attributes" asp-action="SaveOption" class="adm-form adm-narrow">
+    <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="AttributeDefinitionId" />
+
+    <section class="adm-card">
+        <div class="adm-fields">
+            <div class="cinput">
+                <label asp-for="LabelSr">Srpski</label>
+                <input asp-for="LabelSr" lang="sr" />
+                <span asp-validation-for="LabelSr"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="LabelEn">English</label>
+                <input asp-for="LabelEn" lang="en" />
+                <span asp-validation-for="LabelEn"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="Code">@L["Admin_Code"]</label>
+                <input asp-for="Code" spellcheck="false" />
+                <small class="hint">@L["Admin_CodeHint"]</small>
+                <span asp-validation-for="Code"></span>
+            </div>
+            <div class="cinput">
+                <label asp-for="DisplayOrder">@L["Admin_Order"]</label>
+                <input asp-for="DisplayOrder" />
+                <span asp-validation-for="DisplayOrder"></span>
+            </div>
+            @if (Model.ShowSwatch)
+            {
+                <div class="cinput">
+                    <label asp-for="SwatchHex">@L["Admin_Swatch"]</label>
+                    <div class="adm-swatch-input">
+                        <input type="color" value="@(Model.SwatchHex ?? "#cccccc")" aria-label="@L["Admin_Swatch"]"
+                               oninput="this.nextElementSibling.value = this.value.toUpperCase()" />
+                        <input asp-for="SwatchHex" placeholder="#8E2F4C" spellcheck="false" />
+                    </div>
+                    <span asp-validation-for="SwatchHex"></span>
+                </div>
+            }
+        </div>
+    </section>
+
+    <div class="adm-actions">
+        <button type="submit" class="btn-shop">@L["Account_Save"]</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

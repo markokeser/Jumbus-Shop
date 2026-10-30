@@ -1,0 +1,59 @@
+@model AttributeOptionsViewModel
+@{
+    ViewData["Title"] = Model.Attribute.Name;
+    var swatches = Model.Options.Any(o => o.SwatchHex is not null);
+}
+
+<a class="back" asp-area="Admin" asp-controller="Attributes" asp-action="Index">&#8592; @L["Admin_Attributes"]</a>
+
+<header class="adm-head">
+    <div>
+        <h1>@Model.Attribute.Name</h1>
+        <p class="adm-sub">@string.Join(", ", Model.Attribute.Categories)</p>
+    </div>
+    <a class="btn-shop" asp-area="Admin" asp-controller="Attributes" asp-action="CreateOption" asp-route-attributeId="@Model.Attribute.Id">@L["Admin_NewValue"]</a>
+</header>
+
+<section class="adm-card adm-card-flush">
+    <table class="adm-table adm-table-cards">
+        <thead>
+            <tr>
+                <th>Srpski</th>
+                <th>English</th>
+                <th>@L["Admin_Code"]</th>
+                <th class="num">@L["Admin_Uses"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var option in Model.Options)
+            {
+                <tr>
+                    <td data-label="Srpski">
+                        @if (swatches)
+                        {
+                            <span class="adm-swatch" style="background:@(option.SwatchHex ?? "transparent")"></span>
+                        }
+                        <a class="adm-strong" asp-area="Admin" asp-controller="Attributes" asp-action="EditOption" asp-route-id="@option.Id">@option.LabelSr</a>
+                    </td>
+                    <td data-label="English">@option.LabelEn</td>
+                    <td data-label="@L["Admin_Code"]"><code>@option.Code</code></td>
+                    <td class="num" data-label="@L["Admin_Uses"]">@option.Uses</td>
+                    <td class="adm-row-actions">
+                        @if (option.Uses == 0)
+                        {
+                            <form method="post" asp-area="Admin" asp-controller="Attributes" asp-action="DeleteOption" asp-route-id="@option.Id" data-confirm="@L["Admin_ConfirmDelete"]">
+                                <input type="hidden" name="attributeId" value="@Model.Attribute.Id" />
+                                <button type="submit" class="linkish quiet">@L["Admin_Delete"]</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@section Scripts {
+    <partial name="_ConfirmScript" />
+}

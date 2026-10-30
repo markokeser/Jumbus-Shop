@@ -1,0 +1,50 @@
+@model WebShop.ViewModels.Cart.PriceBreakdownViewModel
+
+<dl class="totals">
+    <div>
+        <dt>@L["Totals_Subtotal"]</dt>
+        <dd>@MoneyFormatter.Format(Model.Subtotal, Model.Currency)</dd>
+    </div>
+
+    @if (Model.HasDiscount)
+    {
+        <div class="totals-discount">
+            <dt>@L["Totals_Discount"]</dt>
+            <dd>&#8722;@MoneyFormatter.Format(Model.DiscountAmount, Model.Currency)</dd>
+        </div>
+    }
+
+    <div>
+        <dt>@L["Totals_Shipping"]</dt>
+        <dd>
+            @if (Model.IsShippingFree)
+            {
+                <span class="free">@L["Totals_FreeShipping"]</span>
+            }
+            else
+            {
+                @MoneyFormatter.Format(Model.ShippingFee, Model.Currency)
+            }
+        </dd>
+    </div>
+
+    <div class="totals-sum">
+        <dt>@L["Totals_Total"]</dt>
+        <dd>@MoneyFormatter.Format(Model.Total, Model.Currency)</dd>
+    </div>
+
+    @* Retail prices already contain VAT, so this is what is inside the total
+       rather than something added to it. Saying so avoids the question. *@
+    <div class="totals-vat">
+        <dt>@string.Format(L["Totals_VatIncluded"].Value, (Model.VatRate * 100).ToString("0.##"))</dt>
+        <dd>@MoneyFormatter.Format(Model.VatAmount, Model.Currency)</dd>
+    </div>
+</dl>
+
+@if (Model.RemainingForFreeShipping is { } remaining)
+{
+    <p class="ship-nudge">
+        @string.Format(L["Totals_AddForFreeShipping"].Value,
+            MoneyFormatter.Format(remaining, Model.Currency))
+    </p>
+}

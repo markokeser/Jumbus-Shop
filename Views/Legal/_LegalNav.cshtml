@@ -1,0 +1,23 @@
+@{
+    var current = ViewContext.RouteData.Values["action"] as string;
+    (string Action, string Label)[] links =
+    [
+        ("Shipping", L["Footer_Shipping"].Value),
+        ("Returns", L["Footer_Returns"].Value),
+        ("WithdrawalForm", L["Footer_WithdrawalForm"].Value),
+        ("SizeGuide", L["Footer_SizeGuide"].Value),
+        ("Contact", L["Footer_Contact"].Value),
+        ("Terms", L["Footer_Terms"].Value),
+        ("Privacy", L["Footer_Privacy"].Value),
+        ("Cookies", L["Footer_Cookies"].Value)
+    ];
+}
+
+<nav class="legal-nav" aria-label="@L["Footer_Legal"]">
+    @foreach (var link in links)
+    {
+        var isCurrent = string.Equals(link.Action, current, StringComparison.OrdinalIgnoreCase);
+        <a asp-controller="Legal" asp-action="@link.Action"
+           class="@(isCurrent ? "on" : null)" aria-current="@(isCurrent ? "page" : null)">@link.Label</a>
+    }
+</nav>

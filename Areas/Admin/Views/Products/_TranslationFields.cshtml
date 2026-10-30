@@ -1,0 +1,55 @@
+@model ProductTranslationForm
+@* Rendered twice with HtmlFieldPrefix "Sr" and "En", so asp-for produces
+   Sr.Name / En.Name and server-side errors land next to the right field. *@
+
+<fieldset class="adm-card adm-lang-card" lang="@ViewData["LangCode"]">
+    <legend class="adm-card-hd"><h2>@ViewData["LangName"]</h2></legend>
+
+    <div class="cinput">
+        <label asp-for="Name">@L["Admin_Name"]</label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="Slug">@L["Admin_Slug"]</label>
+        <input asp-for="Slug" spellcheck="false" />
+        <small class="hint">@L["Admin_SlugHintRedirect"]</small>
+        <span asp-validation-for="Slug"></span>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="ShortDescription">@L["Admin_ShortDescription"]</label>
+        <textarea asp-for="ShortDescription" rows="2"></textarea>
+        <span asp-validation-for="ShortDescription"></span>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="Description">@L["Admin_Description"]</label>
+        <textarea asp-for="Description" rows="6"></textarea>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="Ingredients">@L["Admin_Ingredients"]</label>
+        <textarea asp-for="Ingredients" rows="3"></textarea>
+    </div>
+
+    <div class="cinput">
+        <label asp-for="CareInstructions">@L["Admin_Care"]</label>
+        <textarea asp-for="CareInstructions" rows="3"></textarea>
+    </div>
+
+    <details class="adm-seo">
+        <summary>@L["Admin_Seo"]</summary>
+        <div class="cinput">
+            <label asp-for="MetaTitle">@L["Admin_MetaTitle"]</label>
+            <input asp-for="MetaTitle" />
+            <span asp-validation-for="MetaTitle"></span>
+        </div>
+        <div class="cinput">
+            <label asp-for="MetaDescription">@L["Admin_MetaDescription"]</label>
+            <textarea asp-for="MetaDescription" rows="2"></textarea>
+            <span asp-validation-for="MetaDescription"></span>
+        </div>
+    </details>
+</fieldset>

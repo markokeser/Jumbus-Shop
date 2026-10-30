@@ -1,0 +1,10 @@
+@{
+    ViewData["Title"] = L["Account_DeniedTitle"].Value;
+    ViewData["NoIndex"] = true;
+}
+
+<div class="shell auth">
+    <h1>@L["Account_DeniedTitle"]</h1>
+    <p class="auth-lede">@L["Account_DeniedBody"]</p>
+    <a class="btn-shop btn-quiet" asp-controller="Home" asp-action="Index">@L["Common_BackHome"]</a>
+</div>

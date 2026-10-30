@@ -1,0 +1,38 @@
+@model BrandFormViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? L["Admin_NewBrand"].Value : Model.Name;
+}
+
+<a class="back" asp-area="Admin" asp-controller="Brands" asp-action="Index">&#8592; @L["Admin_Brands"]</a>
+<header class="adm-head"><h1>@ViewData["Title"]</h1></header>
+
+<form method="post" asp-area="Admin" asp-controller="Brands" asp-action="Save" class="adm-form adm-narrow">
+    <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <section class="adm-card">
+        <div class="cinput">
+            <label asp-for="Name">@L["Admin_Name"]</label>
+            <input asp-for="Name" />
+            <span asp-validation-for="Name"></span>
+        </div>
+        <div class="cinput">
+            <label asp-for="Slug">@L["Admin_Slug"]</label>
+            <input asp-for="Slug" spellcheck="false" />
+            <small class="hint">@L["Admin_SlugHint"]</small>
+            <span asp-validation-for="Slug"></span>
+        </div>
+        <label class="ccheck">
+            <input asp-for="IsActive" />
+            <span>@L["Admin_Active"]</span>
+        </label>
+    </section>
+
+    <div class="adm-actions">
+        <button type="submit" class="btn-shop">@L["Account_Save"]</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

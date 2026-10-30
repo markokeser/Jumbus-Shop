@@ -1,0 +1,18 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = L["Error_Title"].Value;
+}
+
+<div class="shell sec">
+    <h1>@L["Error_Title"]</h1>
+    <p class="blurb">@L["Error_Body"]</p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="brand">@L["Error_RequestId"]: <code>@Model.RequestId</code></p>
+    }
+
+    <p style="margin-top:24px">
+        <a class="btn-shop btn-quiet" asp-controller="Home" asp-action="Index">@L["Common_BackHome"]</a>
+    </p>
+</div>

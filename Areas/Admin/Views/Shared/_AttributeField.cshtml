@@ -1,0 +1,54 @@
+@model AttributeValueField
+@* One attribute value, rendered under an HtmlFieldPrefix such as
+   "Attributes[2]" so the posted names bind back to the list.
+
+   Written without asp-for on purpose: whether a value is required comes from
+   the database (CategoryAttribute.IsRequired), not from an attribute on the
+   class, so the client-side rule is added here only when it applies. *@
+@{
+    var field = Model.DataType switch
+    {
+        AttributeDataType.Option => Html.NameFor(m => m.OptionId),
+        AttributeDataType.Numeric => Html.NameFor(m => m.NumericValue),
+        _ => Html.NameFor(m => m.TextValue)
+    };
+    var id = Html.IdFor(m => m.OptionId);
+    var required = Model.IsRequired ? L["Validation_Required"].Value : null;
+    var invalid = ViewData.ModelState.TryGetValue(field, out var entry) && entry.Errors.Count > 0 ? "input-validation-error" : null;
+}
+
+<div class="cinput">
+    <input type="hidden" name="@Html.NameFor(m => m.AttributeDefinitionId)" value="@Model.AttributeDefinitionId" />
+    <label for="@id">
+        @Model.Label@(Model.Unit is null ? null : $" ({Model.Unit})")
+        @if (!Model.IsRequired)
+        {
+            <small class="adm-of">@L["Admin_Optional"]</small>
+        }
+    </label>
+
+    @switch (Model.DataType)
+    {
+        case AttributeDataType.Option:
+            <select id="@id" name="@field" class="@invalid" data-val="@(required is null ? null : "true")" data-val-required="@required">
+                <option value="">&#8212;</option>
+                @foreach (var option in Model.Options)
+                {
+                    <option value="@option.Value" selected="@(option.Value == Model.OptionId?.ToString(CultureInfo.InvariantCulture))">@option.Text</option>
+                }
+            </select>
+            break;
+
+        case AttributeDataType.Numeric:
+            <input id="@id" name="@field" type="number" step="any" value="@InputFormat.Number(Model.NumericValue)"
+                   class="@invalid" data-val="@(required is null ? null : "true")" data-val-required="@required" />
+            break;
+
+        default:
+            <input id="@id" name="@field" value="@Model.TextValue" maxlength="200"
+                   class="@invalid" data-val="@(required is null ? null : "true")" data-val-required="@required" />
+            break;
+    }
+
+    <span class="@(invalid is null ? "field-validation-valid" : "field-validation-error")" data-valmsg-for="@field" data-valmsg-replace="true">@entry?.Errors.FirstOrDefault()?.ErrorMessage</span>
+</div>

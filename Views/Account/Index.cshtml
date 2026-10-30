@@ -1,0 +1,49 @@
+@model WebShop.ViewModels.Account.AccountOverviewViewModel
+@{
+    ViewData["Title"] = L["Nav_Account"].Value;
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Overview";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <h1>@string.Format(L["Account_Hello"].Value, Model.FirstName)</h1>
+        <p class="acct-lede">@Model.Email</p>
+
+        <div class="acct-cards">
+            <a class="acct-card" asp-controller="Orders" asp-action="Index">
+                <b>@Model.OrderCount</b>
+                <span>@L["Nav_MyOrders"]</span>
+            </a>
+            <a class="acct-card" asp-controller="Wishlist" asp-action="Index">
+                <b>@Model.WishlistCount</b>
+                <span>@L["Nav_Wishlist"]</span>
+            </a>
+            <a class="acct-card" asp-controller="Addresses" asp-action="Index">
+                <b>@(Model.DefaultAddress is null ? "—" : Model.DefaultAddress.City)</b>
+                <span>@L["Account_DefaultAddress"]</span>
+            </a>
+        </div>
+
+        <section class="acct-section">
+            <div class="sec-hd">
+                <h2>@L["Account_RecentOrders"]</h2>
+                @if (Model.OrderCount > 0)
+                {
+                    <a asp-controller="Orders" asp-action="Index">@L["Common_ViewAll"]</a>
+                }
+            </div>
+
+            @if (Model.RecentOrders.Count == 0)
+            {
+                <p class="acct-empty">@L["Orders_None"]</p>
+            }
+            else
+            {
+                <partial name="_OrderList" model="Model.RecentOrders" />
+            }
+        </section>
+    </div>
+</div>

@@ -1,0 +1,105 @@
+@model AdminProductListViewModel
+@{
+    ViewData["Title"] = L["Admin_Products"].Value;
+    var q = Model.Query;
+}
+
+<header class="adm-head">
+    <h1>@L["Admin_Products"]</h1>
+    <a class="btn-shop" asp-area="Admin" asp-controller="Products" asp-action="Create">@L["Admin_NewProduct"]</a>
+</header>
+
+<form class="adm-filter" method="get" asp-area="Admin" asp-controller="Products" asp-action="Index" role="search">
+    <input type="search" name="q" value="@q.Q" placeholder="@L["Admin_ProductSearch"]" aria-label="@L["Admin_ProductSearch"]" />
+    <select name="categoryId" aria-label="@L["Admin_Category"]">
+        <option value="">@L["Admin_AllCategories"]</option>
+        @foreach (var option in Model.Categories)
+        {
+            <option value="@option.Value" selected="@(option.Value == q.CategoryId?.ToString())">@option.Text</option>
+        }
+    </select>
+    <select name="brandId" aria-label="@L["Admin_Brand"]">
+        <option value="">@L["Admin_AllBrands"]</option>
+        @foreach (var option in Model.Brands)
+        {
+            <option value="@option.Value" selected="@(option.Value == q.BrandId?.ToString())">@option.Text</option>
+        }
+    </select>
+    <select name="status" aria-label="@L["Admin_Status"]">
+        <option value="">@L["Admin_AllStatuses"]</option>
+        @foreach (var status in Enum.GetValues<ProductStatus>())
+        {
+            <option value="@status" selected="@(q.Status == status)">@L["ProductStatus_" + status]</option>
+        }
+    </select>
+    <button type="submit" class="btn-shop btn-quiet">@L["Admin_Filter"]</button>
+</form>
+
+<section class="adm-card adm-card-flush">
+    @if (Model.Products.Count == 0)
+    {
+        <p class="adm-empty">@L["Admin_NothingFound"]</p>
+    }
+    else
+    {
+        <table class="adm-table adm-table-cards">
+            <thead>
+                <tr>
+                    <th colspan="2">@L["Admin_Product"]</th>
+                    <th>@L["Admin_Category"]</th>
+                    <th>@L["Admin_Status"]</th>
+                    <th class="num">@L["Admin_Variants"]</th>
+                    <th class="num">@L["Admin_Stock"]</th>
+                    <th class="num">@L["Admin_Price"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.Products)
+                {
+                    <tr>
+                        <td class="adm-thumb-cell">
+                            @if (!string.IsNullOrEmpty(product.ImagePath))
+                            {
+                                <img class="adm-thumb" src="~/@product.ImagePath" alt="" loading="lazy" />
+                            }
+                            else
+                            {
+                                <span class="adm-thumb adm-thumb-empty" aria-hidden="true"></span>
+                            }
+                        </td>
+                        <td data-label="@L["Admin_Product"]">
+                            <a class="adm-strong" asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id">@product.Name</a>
+                            @if (product.IsFeatured)
+                            {
+                                <i class="adm-tag">@L["Admin_Featured"]</i>
+                            }
+                            <small><code>@product.Sku</code> @product.Brand</small>
+                        </td>
+                        <td data-label="@L["Admin_Category"]">@product.Category</td>
+                        <td data-label="@L["Admin_Status"]">
+                            <span class="adm-pill pill-@product.Status.ToString().ToLowerInvariant()">@L["ProductStatus_" + product.Status]</span>
+                        </td>
+                        <td class="num" data-label="@L["Admin_Variants"]">@product.ActiveVariants<span class="adm-of">/@product.Variants</span></td>
+                        <td class="num" data-label="@L["Admin_Stock"]">@product.Stock</td>
+                        <td class="num" data-label="@L["Admin_Price"]">
+                            @if (product.MinPrice is { } min)
+                            {
+                                @MoneyFormatter.Format(min, Shop.Value.Currency)
+                                @if (product.MaxPrice is { } max && max != min)
+                                {
+                                    <small>&#8211; @MoneyFormatter.Format(max, Shop.Value.Currency)</small>
+                                }
+                            }
+                            else
+                            {
+                                <span class="adm-of">&#8212;</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+<partial name="_AdminPager" model="Model.Page" />

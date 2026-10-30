@@ -1,0 +1,58 @@
+@model List<WebShop.Models.Orders.Address>
+@{
+    ViewData["Title"] = L["Account_Addresses"].Value;
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Addresses";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <div class="sec-hd">
+            <h1>@L["Account_Addresses"]</h1>
+            <a class="btn-shop btn-quiet" asp-controller="Addresses" asp-action="Create">@L["Address_Add"]</a>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <p class="acct-empty">@L["Address_None"]</p>
+        }
+        else
+        {
+            <div class="addr-grid">
+                @foreach (var address in Model)
+                {
+                    <div class="addr @(address.IsDefault ? "is-default" : null)">
+                        @if (address.IsDefault)
+                        {
+                            <span class="addr-badge">@L["Address_Default"]</span>
+                        }
+
+                        <address>
+                            <b>@address.FirstName @address.LastName</b><br />
+                            @address.Street @address.StreetNumber<br />
+                            @address.PostalCode @address.City<br />
+                            @address.PhoneNumber
+                        </address>
+
+                        <div class="addr-actions">
+                            <a asp-controller="Addresses" asp-action="Edit" asp-route-id="@address.Id">@L["Address_Edit"]</a>
+
+                            @if (!address.IsDefault)
+                            {
+                                <form method="post" asp-controller="Addresses" asp-action="MakeDefault" asp-route-id="@address.Id">
+                                    <button type="submit" class="linkish">@L["Address_MakeDefault"]</button>
+                                </form>
+                            }
+
+                            <form method="post" asp-controller="Addresses" asp-action="Delete" asp-route-id="@address.Id">
+                                <button type="submit" class="linkish quiet">@L["Cart_Remove"]</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

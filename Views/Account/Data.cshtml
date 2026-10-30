@@ -1,0 +1,52 @@
+@model WebShop.ViewModels.Account.DeleteAccountViewModel
+@{
+    ViewData["Title"] = L["Account_Data"].Value;
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "Data";
+}
+
+<div class="shell acct">
+    <partial name="_AccountNav" />
+
+    <div class="acct-main">
+        <h1>@L["Account_Data"]</h1>
+        <p class="acct-lede">@L["Account_DataLede"] <a asp-controller="Legal" asp-action="Privacy">@L["Footer_Privacy"]</a>.</p>
+
+        <section class="acct-section">
+            <h2>@L["Account_ExportTitle"]</h2>
+            <p>@L["Account_ExportText"]</p>
+            <a class="btn-shop btn-quiet" asp-controller="Account" asp-action="Export">@L["Account_ExportButton"]</a>
+        </section>
+
+        <section class="acct-section acct-danger">
+            <h2>@L["Account_DeleteTitle"]</h2>
+            <p>@L["Account_DeleteText"]</p>
+            <ul>
+                <li>@L["Account_DeleteGone"]</li>
+                <li>@L["Account_DeleteKept"]</li>
+            </ul>
+
+            <form method="post" asp-controller="Account" asp-action="Delete" class="acct-form">
+                <div asp-validation-summary="ModelOnly" class="notice notice-bad"></div>
+
+                <div class="cinput">
+                    <label asp-for="Password">@L["Account_CurrentPassword"]</label>
+                    <input asp-for="Password" autocomplete="current-password" />
+                    <span asp-validation-for="Password"></span>
+                </div>
+
+                <label class="ccheck">
+                    <input asp-for="Confirm" />
+                    <span>@L["Account_DeleteConfirm"]</span>
+                </label>
+                <span asp-validation-for="Confirm"></span>
+
+                <button type="submit" class="btn-shop btn-danger">@L["Account_DeleteButton"]</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

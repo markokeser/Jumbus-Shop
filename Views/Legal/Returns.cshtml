@@ -1,0 +1,90 @@
+@{
+    var shop = ShopOptions.Value;
+    var company = shop.Company;
+    ViewData["Title"] = "Returns and complaints";
+    ViewData["MetaDescription"] = $"Withdrawing from a purchase within {shop.ReturnDays} days, refunds, complaints and out-of-court dispute resolution.";
+}
+@* English version of Returns.sr.cshtml; keep the two in step. *@
+
+<div class="shell legal">
+    <article class="legal-doc">
+        <h1>@ViewData["Title"]</h1>
+        <p class="legal-meta">In force from 30 October 2026. This translation is provided for convenience; the Serbian version prevails.</p>
+
+        <nav class="legal-toc" aria-label="Contents">
+            <a href="#odustanak">Withdrawing from a purchase</a>
+            <a href="#reklamacija">Complaints</a>
+            <a href="#vansudsko">Out-of-court dispute resolution</a>
+        </nav>
+
+        <section id="odustanak">
+            <h2>Withdrawing from a purchase</h2>
+            <p>You can cancel a purchase within <strong>@shop.ReturnDays days of the day you received the goods</strong>, without giving a reason. If one order came in several parcels, the period runs from the last one.</p>
+
+            <h3>How</h3>
+            <ol>
+                <li>Send us the <a asp-action="WithdrawalForm">withdrawal form</a> or any clear statement that you are withdrawing — by email to <a href="mailto:@company.Email">@company.Email</a> or by post to the address below. Include the order number. You are in time if you send the statement before the period ends.</li>
+                <li>We confirm receipt by email without delay.</li>
+                <li>Return the goods within <strong>14 days of the day you sent the statement</strong>, to: <strong>@company.LegalName, @company.ReturnsTo</strong>.</li>
+            </ol>
+
+            <h3>Costs and the condition of the goods</h3>
+            <p>You pay the direct cost of returning the goods. You may examine them as you would in a shop: try them on and see how they fit. You are liable for any loss in value only if you handled them beyond that — wore or washed them, for instance, or removed the labels.</p>
+
+            <h3>Refund</h3>
+            <p>We refund everything you paid, including standard delivery, <strong>within 14 days of receiving your statement</strong>. We may hold the refund until we have the goods back or proof that you sent them, whichever comes first.</p>
+            <ul>
+                <li>If you paid by card, the money goes back to the same card.</li>
+                <li>If you paid cash on delivery, send your bank account number with the statement and we transfer the money there, at no cost to you.</li>
+            </ul>
+
+            <h3>When withdrawal does not apply</h3>
+            <p>The law excludes goods where it would not be reasonable. For us that means:</p>
+            <ul>
+                <li><strong>cosmetics and fragrances whose protective seal was opened</strong> after delivery — sealed goods that cannot be returned once unsealed, for health or hygiene reasons: a removed wrap, an opened cap, a broken seal sticker;</li>
+                <li>goods made to your measurements or personalised for you.</li>
+            </ul>
+            <p>Unopened cosmetics can be returned like anything else.</p>
+        </section>
+
+        <section id="reklamacija">
+            <h2>Complaints</h2>
+            <p>We are liable for goods not conforming to the contract — damage, a manufacturing fault, the wrong product, size or shade — that appears within <strong>two years of delivery</strong>. If the problem appears within the first six months, it is presumed to have existed on delivery unless we prove otherwise.</p>
+
+            <h3>How to complain</h3>
+            <p>By email to <a href="mailto:@company.Email">@company.Email</a>, by phone on @company.Phone or by letter to the seller's address. Attach proof of purchase — the receipt, the order confirmation or a bank statement — and, if you can, a photo of the defect. Say what you would like us to do.</p>
+
+            <h3>Deadlines</h3>
+            <ul>
+                <li>We confirm receipt without delay, with the number your complaint is filed under.</li>
+                <li>Within <strong>8 days</strong> of receiving it we tell you whether we accept it, with our reasons and a proposed solution.</li>
+                <li>We resolve the complaint within <strong>15 days</strong> of its filing.</li>
+            </ul>
+
+            <h3>What you can ask for</h3>
+            <ul>
+                <li>repair or replacement — your choice;</li>
+                <li>a price reduction or termination of the contract, if repair or replacement is impossible or we do not carry it out in a reasonable time;</li>
+                <li>if the problem appears within the first six months, replacement, a price reduction or termination straight away.</li>
+            </ul>
+            <p>We bear all costs of putting the problem right, including shipping. Complaints are kept in a register for at least two years.</p>
+        </section>
+
+        <section id="vansudsko">
+            <h2>Out-of-court dispute resolution</h2>
+            <p>If we have not resolved your complaint the way you expect, you can start out-of-court consumer dispute resolution before a body on the list kept by the ministry responsible for consumer protection, published on that ministry's website.</p>
+            <ul>
+                <li>You need to have made the complaint to us first.</li>
+                <li>We are obliged to take part.</li>
+                <li>The procedure is free for both sides; each pays only its own costs, such as representation or travel.</li>
+                <li>It takes at most 90 days, which can be extended once by another 90 days in complex cases.</li>
+            </ul>
+            <p>You keep the right to go to court.</p>
+        </section>
+
+        <h2>The seller</h2>
+        <partial name="_Company" />
+    </article>
+
+    <partial name="_LegalNav" />
+</div>
