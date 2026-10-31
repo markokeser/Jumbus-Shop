@@ -27,9 +27,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<ShopSettings>(
     builder.Configuration.GetSection(ShopSettings.SectionName));
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException(
-        "Connection string 'DefaultConnection' is missing from appsettings.json.");
+// ConnectionStrings:DefaultConnection with its ${MYSQLHOST}-style placeholders
+// filled in: from the Railway Variables there, from User Secrets locally.
+var connectionString = DatabaseConnection.Resolve(builder.Configuration);
 
 // ServerVersion.AutoDetect opens a connection at startup to read the server
 // banner. That means the database has to be reachable before the app boots.
